@@ -43,20 +43,32 @@ def listar_creditos():
         'plazo': c.plazo, 'fecha_otorgamiento': c.fecha_otorgamiento
     } for c in creditos])
 
-# Ruta para editar crédito
-@app.route('/creditos/<int:id>', methods=['PUT'])
+# Ruta para obtener y editar crédito
+@app.route('/creditos/<int:id>', methods=['GET', 'PUT'])
 def editar_credito(id):
-    data = request.json
-    credito = Credito.query.get(id)
-    if not credito:
-        return jsonify({'error': 'Crédito no encontrado'}), 404
-    credito.cliente = data['cliente']
-    credito.monto = data['monto']
-    credito.tasa_interes = data['tasa_interes']
-    credito.plazo = data['plazo']
-    credito.fecha_otorgamiento = data['fecha_otorgamiento']
-    db.session.commit()
-    return jsonify({'message': 'Crédito actualizado correctamente'})
+    if request.method == 'GET':
+        credito = Credito.query.get(id)
+        if not credito:
+            return jsonify({'error': 'Crédito no encontrado'}), 404
+        return jsonify({
+            'id': credito.id, 'cliente': credito.cliente, 'monto': credito.monto,
+            'tasa_interes': credito.tasa_interes, 'plazo': credito.plazo,
+            'fecha_otorgamiento': credito.fecha_otorgamiento
+        })
+    
+    if request.method == 'PUT':
+        data = request.json
+        credito = Credito.query.get(id)
+        if not credito:
+            return jsonify({'error': 'Crédito no encontrado'}), 404
+        
+        credito.cliente = data['cliente']
+        credito.monto = data['monto']
+        credito.tasa_interes = data['tasa_interes']
+        credito.plazo = data['plazo']
+        credito.fecha_otorgamiento = data['fecha_otorgamiento']
+        db.session.commit()
+        return jsonify({'message': 'Crédito actualizado correctamente'})
 
 # Ruta para eliminar crédito
 @app.route('/creditos/<int:id>', methods=['DELETE'])

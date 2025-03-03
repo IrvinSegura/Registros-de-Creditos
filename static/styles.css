@@ -1,7 +1,67 @@
-/*Add css in app */ 
+/* General Styles */
 body {
-    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
 }
-h1 {
-    text-align: center;
+
+/* Card Style */
+.card-header {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
 }
+
+/* Card Styles */
+.card-body {
+    padding: 2rem;
+}
+
+/* Modal Styles in content */
+.modal-content {
+    border-radius: 10px;
+}
+
+/* Modal Header Styles */
+.modal-header {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Modal Body Styles */
+.modal-body {
+    padding: 2rem;
+}
+
+/* Title Styles in modal */
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 8px;
+}
+
+/* Button Styles */
+.btn {
+        padding: 10px 20px; 
+        font-size: 16px; 
+}
+
+/* Table Styles */
+.table th, .table td {
+    vertical-align: middle;
+}
+
+/* Responsive Styles */
+@media (max-width: 767px) {
+    th, td {
+        font-size: 14px;
+    }
+    .acciones {
+        white-space: nowrap; 
+        width: 1%; 
+    }
+}
+

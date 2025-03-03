@@ -1,24 +1,159 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <title>Registro de Créditos</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
-    // Section to register a new credit
-    <h1>Registro de Créditos</h1>
-    <form id="formulario">
-        <input type="text" id="cliente" placeholder="Cliente" required>
-        <input type="number" id="monto" placeholder="Monto" required>
-        <input type="number" step="0.01" id="tasa_interes" placeholder="Tasa de Interés" required>
-        <input type="number" id="plazo" placeholder="Plazo (meses)" required>
-        <input type="date" id="fecha_otorgamiento" required>
-        <button type="submit">Registrar</button>
-    </form>
-    <table id="tabla"></table>
-    <canvas id="grafica"></canvas>
+
+<body class="bg-light">
+    <div class="container-fluid">
+        <!-- Título Principal -->
+        <div class="row my-4">
+            <div class="col-12 text-center">
+                <h1 class="h3"><strong>Registro de Créditos</strong></h1>
+            </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0 text-center">Formulario de Registro</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="formulario" class="needs-validation" novalidate>
+                            <div class="row mb-3">
+                                <!-- Cliente -->
+                                <div class="col-6">
+                                    <label for="cliente" class="form-label">Cliente</label>
+                                    <input type="text" id="cliente" class="form-control" placeholder="Cliente" required>
+                                    <div class="invalid-feedback">Ingrese un cliente válido.</div>
+                                </div>
+                                <!-- Monto -->
+                                <div class="col-6">
+                                    <label for="monto" class="form-label">Monto</label>
+                                    <input type="number" id="monto" class="form-control" placeholder="Monto" required>
+                                    <div class="invalid-feedback">Ingrese un monto válido.</div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Tasa de Interés -->
+                                <div class="col-6">
+                                    <label for="tasa_interes" class="form-label">Tasa de Interés</label>
+                                    <input type="number" step="0.01" id="tasa_interes" class="form-control" placeholder="Tasa de Interés" required>
+                                    <div class="invalid-feedback">Ingrese una tasa de interés válida.</div>
+                                </div>
+                                <!-- Plazo -->
+                                <div class="col-6">
+                                    <label for="plazo" class="form-label">Plazo (meses)</label>
+                                    <input type="number" id="plazo" class="form-control" placeholder="Plazo (meses)" required>
+                                    <div class="invalid-feedback">Ingrese un plazo válido.</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <!-- Fecha de Otorgamiento -->
+                                <label for="fecha_otorgamiento" class="form-label">Fecha de Otorgamiento</label>
+                                <input type="date" id="fecha_otorgamiento" class="form-control" required>
+                                <div class="invalid-feedback">Ingrese una fecha válida.</div>
+                            </div>
+
+                            <!-- Botón de Registro -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Créditos -->
+        <div class="row mt-4 justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0 text-center">Créditos Registrados</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Monto</th>
+                                    <th>Tasa de Interés</th>
+                                    <th>Plazo (meses)</th>
+                                    <th>Fecha de Otorgamiento</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="creditos-body">
+                                <tr>
+                                    <td>Juan Pérez</td>
+                                    <td>$10,000</td>
+                                    <td>5%</td>
+                                    <td>12</td>
+                                    <td>2025-03-03</td>
+                                    <td class="acciones">
+                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarCredito">Editar</button>
+                                        <button class="btn btn-danger btn-sm">Eliminar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Editar Crédito -->
+        <div class="modal fade" id="modalEditarCredito" tabindex="-1" aria-labelledby="modalEditarCreditoLabel" aria-hidden="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarCreditoLabel">Editar Crédito</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formEditarCredito">
+                            <input type="hidden" id="edit-id">
+                            <div class="mb-3">
+                                <label for="edit-cliente" class="form-label">Cliente</label>
+                                <input type="text" class="form-control" id="edit-cliente" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-monto" class="form-label">Monto</label>
+                                <input type="number" class="form-control" id="edit-monto" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-tasa_interes" class="form-label">Tasa de Interés (%)</label>
+                                <input type="number" class="form-control" id="edit-tasa_interes" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-plazo" class="form-label">Plazo (meses)</label>
+                                <input type="number" class="form-control" id="edit-plazo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-fecha_otorgamiento" class="form-label">Fecha de Otorgamiento</label>
+                                <input type="date" class="form-control" id="edit-fecha_otorgamiento" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/script.js"></script>
 </body>
+
 </html>
