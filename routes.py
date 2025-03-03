@@ -1,25 +1,27 @@
+# Importing the necessary libraries
 from flask import Flask, request, jsonify
 from models import db, Credito
 from config import SQLALCHEMY_DATABASE_URI
 from flask_cors import CORS
 from flask import render_template
 
+# Creating the Flask app
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
 db.init_app(app)
 
-# Crear la base de datos
+# Creating the database
 with app.app_context():
     db.create_all()
 
-# Ruta principal
+# Defining the routes
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Ruta para agregar crédito
+# Route to add a new credit
 @app.route('/creditos', methods=['POST'])
 def agregar_credito():
     data = request.json
@@ -34,7 +36,7 @@ def agregar_credito():
     db.session.commit()
     return jsonify({'message': 'Crédito registrado correctamente'}), 201
 
-# Ruta para obtener todos los créditos
+# Route to list all credits
 @app.route('/creditos', methods=['GET'])
 def listar_creditos():
     creditos = Credito.query.all()
@@ -43,7 +45,7 @@ def listar_creditos():
         'plazo': c.plazo, 'fecha_otorgamiento': c.fecha_otorgamiento
     } for c in creditos])
 
-# Ruta para obtener y editar crédito
+# Route to edit a credit
 @app.route('/creditos/<int:id>', methods=['GET', 'PUT'])
 def editar_credito(id):
     if request.method == 'GET':
@@ -70,7 +72,7 @@ def editar_credito(id):
         db.session.commit()
         return jsonify({'message': 'Crédito actualizado correctamente'})
 
-# Ruta para eliminar crédito
+# Route to delete a credit
 @app.route('/creditos/<int:id>', methods=['DELETE'])
 def eliminar_credito(id):
     credito = Credito.query.get(id)
