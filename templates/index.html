@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Créditos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    // Section to register a new credit
+    <h1>Registro de Créditos</h1>
+    <form id="formulario">
+        <input type="text" id="cliente" placeholder="Cliente" required>
+        <input type="number" id="monto" placeholder="Monto" required>
+        <input type="number" step="0.01" id="tasa_interes" placeholder="Tasa de Interés" required>
+        <input type="number" id="plazo" placeholder="Plazo (meses)" required>
+        <input type="date" id="fecha_otorgamiento" required>
+        <button type="submit">Registrar</button>
+    </form>
+    <table id="tabla"></table>
+    <canvas id="grafica"></canvas>
+    <script src="/static/script.js"></script>
+</body>
+</html>
