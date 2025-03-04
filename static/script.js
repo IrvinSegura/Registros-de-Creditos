@@ -1,25 +1,120 @@
-// Event listener for the form submission
-document.getElementById("formulario").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    let data = {
-        cliente: document.getElementById("cliente").value,
-        monto: parseFloat(document.getElementById("monto").value),
-        tasa_interes: parseFloat(document.getElementById("tasa_interes").value),
-        plazo: parseInt(document.getElementById("plazo").value),
-        fecha_otorgamiento: document.getElementById("fecha_otorgamiento").value
-    };
-
-    let response = await fetch("/creditos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("formulario");
+    const inputs = form.querySelectorAll("input");
+    
+    inputs.forEach(input => {
+        input.addEventListener("input", () => validarCampo(input));
     });
 
-    if (response.ok) {
-        alert("Crédito registrado");
-        window.location.reload();
-    }
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        let valido = true;
+        
+        inputs.forEach(input => {
+            if (!validarCampo(input)) {
+                valido = false;
+            }
+        });
+
+        if (!valido) return;
+
+        let data = {
+            cliente: document.getElementById("cliente").value,
+            monto: parseInt(document.getElementById("monto").value),
+            tasa_interes: parseFloat(document.getElementById("tasa_interes").value),
+            plazo: parseInt(document.getElementById("plazo").value),
+            fecha_otorgamiento: document.getElementById("fecha_otorgamiento").value
+        };
+
+        let response = await fetch("/creditos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            mostrarNotificacion("¡Crédito registrado exitosamente!");
+            setTimeout(() => {
+                location.reload();
+            }
+            , 1000);
+        } else {
+            alert("Error al registrar el crédito.");
+        }
+    });
 });
+
+function mostrarNotificacion(mensaje) {
+    const notification = document.createElement("div");
+    notification.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
+    notification.style.position = "fixed";
+    notification.style.top = "20px";
+    notification.style.right = "20px";
+    notification.style.zIndex = "1050";
+    notification.setAttribute("role", "alert");
+    notification.innerHTML = `
+        <strong>${mensaje}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.display = "none";
+    }, 1000);
+}
+
+function validarCampo(input) {
+    const errorSpan = obtenerErrorSpan(input);
+    let valido = true;
+    let value = input.value.trim();
+    
+    if (input.id === "cliente") {
+        if (!/^[A-Z][a-zA-Z\s]+$/.test(value)) {
+            errorSpan.textContent = "El nombre debe empezar con mayúscula y no contener números.";
+            valido = false;
+        }
+    } else if (input.id === "fecha_otorgamiento") {
+        let fechaIngresada = new Date(value);
+        let hoy = new Date();
+        let year = fechaIngresada.getFullYear();
+        let mes = fechaIngresada.getMonth() + 1;
+        let dia = fechaIngresada.getDate();
+        let esBisiesto = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        let diasPorMes = [31, esBisiesto ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        if (isNaN(fechaIngresada) || fechaIngresada < hoy || year < 2000 || year > 2099 || mes > 12 || dia > diasPorMes[mes - 1]) {
+            errorSpan.textContent = "Ingrese una fecha válida y no anterior a hoy.";
+            valido = false;
+        }
+    } else if (input.id === "tasa_interes") {
+        if (value === "" || isNaN(value) || parseFloat(value) < 1) {
+            errorSpan.textContent = "La tasa de interés es obligatoria y debe ser un número mayor o igual a 1.";
+            valido = false;
+        }
+    } else if (input.id === "plazo" || input.id === "monto") {
+        if (!/^\d+$/.test(value) || parseInt(value) <= 0) {
+            errorSpan.textContent = "Debe ser un número entero positivo.";
+            valido = false;
+        }
+    }
+    
+    if (valido) {
+        errorSpan.textContent = "";
+    }
+    return valido;
+}
+
+function obtenerErrorSpan(input) {
+    let errorSpan = input.nextElementSibling;
+    if (!errorSpan || !errorSpan.classList.contains("error-message")) {
+        errorSpan = document.createElement("span");
+        errorSpan.classList.add("error-message");
+        errorSpan.style.color = "red";
+        input.parentNode.appendChild(errorSpan);
+    }
+    return errorSpan;
+}
 
 // DomContentLoaded event listener to load the credits
 document.addEventListener("DOMContentLoaded", function() {
