@@ -1,3 +1,4 @@
+// DOM Content Loaded event listener to validate the form
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formulario");
     const inputs = form.querySelectorAll("input");
@@ -36,14 +37,14 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarNotificacion("¡Crédito registrado exitosamente!");
             setTimeout(() => {
                 location.reload();
-            }
-            , 1000);
+            }, 1000);
         } else {
             alert("Error al registrar el crédito.");
         }
     });
 });
 
+// Function to show a notification with pop-up message
 function mostrarNotificacion(mensaje) {
     const notification = document.createElement("div");
     notification.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
@@ -64,6 +65,7 @@ function mostrarNotificacion(mensaje) {
     }, 1000);
 }
 
+// Function to validate the form fields
 function validarCampo(input) {
     const errorSpan = obtenerErrorSpan(input);
     let valido = true;
@@ -105,6 +107,7 @@ function validarCampo(input) {
     return valido;
 }
 
+// Function to get the error span element
 function obtenerErrorSpan(input) {
     let errorSpan = input.nextElementSibling;
     if (!errorSpan || !errorSpan.classList.contains("error-message")) {
