@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("formulario");
     const inputs = form.querySelectorAll("input");
-    
+
     inputs.forEach(input => {
         input.addEventListener("input", () => validarCampo(input));
     });
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
         let valido = true;
-        
+
         inputs.forEach(input => {
             if (!validarCampo(input)) {
                 valido = false;
@@ -34,35 +34,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (response.ok) {
-            mostrarNotificacion("¡Crédito registrado exitosamente!");
-            setTimeout(() => {
+            Swal.fire({
+                icon: "success",
+                title: "¡Crédito registrado!",
+                text: "El crédito ha sido registrado exitosamente.",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
                 location.reload();
-            }, 1000);
+            });
         } else {
-            alert("Error al registrar el crédito.");
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema al registrar el crédito. Inténtalo de nuevo.",
+            });
         }
     });
 });
 
 // Function to show a notification with pop-up message
 function mostrarNotificacion(mensaje) {
-    const notification = document.createElement("div");
-    notification.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
-    notification.style.position = "fixed";
-    notification.style.top = "20px";
-    notification.style.right = "20px";
-    notification.style.zIndex = "1050";
-    notification.setAttribute("role", "alert");
-    notification.innerHTML = `
-        <strong>${mensaje}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-
-    document.body.appendChild(notification);
+    const notification = document.getElementById('notification');
+    notification.querySelector('strong').textContent = mensaje;
+    notification.style.display = 'block';
 
     setTimeout(() => {
-        notification.style.display = "none";
-    }, 1000);
+        notification.style.display = 'none';
+    }, 2000);
 }
 
 // Function to validate the form fields
@@ -70,7 +69,7 @@ function validarCampo(input) {
     const errorSpan = obtenerErrorSpan(input);
     let valido = true;
     let value = input.value.trim();
-    
+
     if (input.id === "cliente") {
         if (!/^[A-Z][a-zA-Z\s]+$/.test(value)) {
             errorSpan.textContent = "El nombre debe empezar con mayúscula y no contener números.";
@@ -90,17 +89,22 @@ function validarCampo(input) {
             valido = false;
         }
     } else if (input.id === "tasa_interes") {
-        if (value === "" || isNaN(value) || parseFloat(value) < 1) {
-            errorSpan.textContent = "La tasa de interés es obligatoria y debe ser un número mayor o igual a 1.";
+        if (value === "" || isNaN(value) || parseFloat(value) < 1 || parseFloat(value) > 100) {
+            errorSpan.textContent = "La tasa de interé debe ser un número mayor a 0 y menor a 100.";
             valido = false;
         }
-    } else if (input.id === "plazo" || input.id === "monto") {
+    } else if (input.id === "plazo") {
+        if (!/^\d+$/.test(value) || parseInt(value) <= 0 || parseInt(value) > 360) {
+            errorSpan.textContent = "Debe ser mayor a 0 y menor o igual a 360.";
+            valido = false;
+        }
+    } else if (input.id === "monto") {
         if (!/^\d+$/.test(value) || parseInt(value) <= 0) {
-            errorSpan.textContent = "Debe ser un número entero positivo.";
+            errorSpan.textContent = "El monto debe ser un número mayor a 0.";
             valido = false;
         }
     }
-    
+
     if (valido) {
         errorSpan.textContent = "";
     }
@@ -120,7 +124,7 @@ function obtenerErrorSpan(input) {
 }
 
 // DomContentLoaded event listener to load the credits
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     cargarCreditos();
 });
 
@@ -128,7 +132,6 @@ document.addEventListener("DOMContentLoaded", function() {
 async function cargarCreditos() {
     let response = await fetch("/creditos");
     let data = await response.json();
-    
     let tbody = document.getElementById("creditos-body");
     tbody.innerHTML = ""; 
 
@@ -175,6 +178,20 @@ async function mostrarModalEditar(id) {
 document.getElementById("formEditarCredito").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const form = document.getElementById("formEditarCredito");
+    const inputs = form.querySelectorAll("input");
+    let valido = true;
+
+    // Validate all inputs before sending the request
+    inputs.forEach(input => {
+        if (!validarCampo(input)) {
+            valido = false;
+        }
+    });
+
+    // If validation fails, do not proceed
+    if (!valido) return;
+
     let id = document.getElementById("edit-id").value;
     let data = {
         cliente: document.getElementById("edit-cliente").value,
@@ -185,29 +202,54 @@ document.getElementById("formEditarCredito").addEventListener("submit", async fu
     };
 
     let response = await fetch(`/creditos/${id}`, {
-        method: "PUT", 
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     });
 
     if (response.ok) {
-        alert("Crédito actualizado correctamente");
-        let modal = bootstrap.Modal.getInstance(document.getElementById("modalEditarCredito"));
-        modal.hide();
-        cargarCreditos(); 
+        Swal.fire({
+            icon: "success",
+            title: "¡Crédito actualizado!",
+            text: "El crédito ha sido actualizado exitosamente.",
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => {
+            let modal = bootstrap.Modal.getInstance(document.getElementById("modalEditarCredito"));
+            modal.hide();
+            cargarCreditos(); 
+        });
     } else {
-        alert("Error al actualizar el crédito");
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un problema al actualizar el crédito. Inténtalo de nuevo.",
+        });
     }
-}); 
+});
+
 
 // Function to delete a credit
 async function eliminarCredito(id) {
-    if (!confirm("¿Seguro que deseas eliminar este crédito?")) return;
-    
-    let response = await fetch(`/creditos/${id}`, { method: "DELETE" });
+    Swal.fire({
+        title: "¿Está seguro?",
+        text: "Esta acción no se puede deshacer.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            let response = await fetch(`/creditos/${id}`, { method: "DELETE" });
 
-    if (response.ok) {
-        alert("Crédito eliminado correctamente");
-        cargarCreditos(); 
-    }
+            if (response.ok) {
+                Swal.fire("Eliminado", "El crédito ha sido eliminado correctamente.", "success");
+                cargarCreditos();
+            } else {
+                Swal.fire("Error", "No se pudo eliminar el crédito.", "error");
+            }
+        }
+    });
 }
