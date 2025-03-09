@@ -70,12 +70,12 @@ function validarCampo(input) {
     let valido = true;
     let value = input.value.trim();
 
-    if (input.id === "cliente") {
+    if (input.id === "cliente" || input.id === "edit-cliente") {
         if (!/^[A-Z][a-zA-Z\s]+$/.test(value)) {
             errorSpan.textContent = "El nombre debe empezar con mayúscula y no contener números.";
             valido = false;
         }
-    } else if (input.id === "fecha_otorgamiento") {
+    } else if (input.id === "fecha_otorgamiento" || input.id === "edit-fecha_otorgamiento") {
         let fechaIngresada = new Date(value);
         let hoy = new Date();
         let year = fechaIngresada.getFullYear();
@@ -88,17 +88,17 @@ function validarCampo(input) {
             errorSpan.textContent = "Ingrese una fecha válida y no anterior a hoy.";
             valido = false;
         }
-    } else if (input.id === "tasa_interes") {
+    } else if (input.id === "tasa_interes" || input.id === "edit-tasa_interes") {
         if (value === "" || isNaN(value) || parseFloat(value) < 1 || parseFloat(value) > 100) {
             errorSpan.textContent = "La tasa de interé debe ser un número mayor a 0 y menor a 100.";
             valido = false;
         }
-    } else if (input.id === "plazo") {
+    } else if (input.id === "plazo" || input.id === "edit-plazo") {
         if (!/^\d+$/.test(value) || parseInt(value) <= 0 || parseInt(value) > 360) {
             errorSpan.textContent = "Debe ser mayor a 0 y menor o igual a 360.";
             valido = false;
         }
-    } else if (input.id === "monto") {
+    } else if (input.id === "monto" || input.id === "edit-monto") {
         if (!/^\d+$/.test(value) || parseInt(value) <= 0) {
             errorSpan.textContent = "El monto debe ser un número mayor a 0.";
             valido = false;
@@ -182,14 +182,13 @@ document.getElementById("formEditarCredito").addEventListener("submit", async fu
     const inputs = form.querySelectorAll("input");
     let valido = true;
 
-    // Validate all inputs before sending the request
+    // Validate the fields
     inputs.forEach(input => {
         if (!validarCampo(input)) {
             valido = false;
         }
     });
 
-    // If validation fails, do not proceed
     if (!valido) return;
 
     let id = document.getElementById("edit-id").value;
@@ -227,7 +226,6 @@ document.getElementById("formEditarCredito").addEventListener("submit", async fu
         });
     }
 });
-
 
 // Function to delete a credit
 async function eliminarCredito(id) {
