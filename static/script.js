@@ -246,7 +246,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }).then(() => {
                 let modal = bootstrap.Modal.getInstance(document.getElementById("modalEditarCredito"));
                 modal.hide();
-                cargarCreditos(); 
+                cargarCreditos();
+                actualizarGrafico(); 
             });
         } else {
             Swal.fire({
@@ -281,4 +282,64 @@ async function eliminarCredito(id) {
             }
         }
     });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    cargarCreditosParaGrafica();
+});
+
+// credit graph save in a variable
+let creditosChart;
+
+// Function to load the credits for the graph
+async function cargarCreditosParaGrafica() {
+    let response = await fetch("/creditos");
+    let data = await response.json();
+
+    // Process the data to get the total of the credits
+    const clientes = data.map(credito => credito.cliente);
+    const montos = data.map(credito => credito.monto);
+
+    if (creditosChart) {
+        creditosChart.destroy();
+    }
+
+    // Create the chart
+    const ctx = document.getElementById('creditosChart').getContext('2d');
+    creditosChart = new Chart(ctx, {
+        type: 'bar', 
+        data: {
+            labels: clientes,  
+            datasets: [{
+                label: 'Monto: ($)',
+                data: montos, 
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,  
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Function to update the graph
+async function actualizarGrafico() {
+    let response = await fetch("/creditos"); 
+    let data = await response.json();
+
+    const clientes = data.map(credito => credito.cliente);
+    const montos = data.map(credito => credito.monto);
+
+    creditosChart.data.labels = clientes;
+    creditosChart.data.datasets[0].data = montos;
+
+    creditosChart.update();
 }
