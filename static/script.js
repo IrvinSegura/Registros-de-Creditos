@@ -175,56 +175,87 @@ async function mostrarModalEditar(id) {
 }
 
 // Event listener for the edit form submission
-document.getElementById("formEditarCredito").addEventListener("submit", async function(e) {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
+    const formEditar = document.getElementById("formEditarCredito");
+    const inputsEditar = formEditar.querySelectorAll("input");
+    const submitButtonEditar = formEditar.querySelector("button[type='submit']");
 
-    const form = document.getElementById("formEditarCredito");
-    const inputs = form.querySelectorAll("input");
-    let valido = true;
+    // Disable the submit button when the page loads
+    submitButtonEditar.disabled = true;
 
-    // Validate the fields
-    inputs.forEach(input => {
-        if (!validarCampo(input)) {
-            valido = false;
+    // Store the initial values of the edit form fields
+    const initialValuesEditar = {};
+
+    inputsEditar.forEach(input => {
+        // Save the initial values of the fields
+        initialValuesEditar[input.id] = input.value.trim();
+
+        input.addEventListener("input", () => validarCampo(input));
+    });
+
+    // Function to check if the values have changed
+    function verificarCambioEditar() {
+        let formularioHaCambiado = false;
+
+        inputsEditar.forEach(input => {
+            if (input.value.trim() !== initialValuesEditar[input.id]) {
+                formularioHaCambiado = true;
+            }
+        });
+
+        submitButtonEditar.disabled = !formularioHaCambiado;
+    }
+
+    // Check for changes in the edit form
+    formEditar.addEventListener("input", verificarCambioEditar);
+
+    formEditar.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        let valido = true;
+
+        inputsEditar.forEach(input => {
+            if (!validarCampo(input)) {
+                valido = false;
+            }
+        });
+
+        if (!valido) return;
+
+        let id = document.getElementById("edit-id").value;
+        let data = {
+            cliente: document.getElementById("edit-cliente").value,
+            monto: parseFloat(document.getElementById("edit-monto").value),
+            tasa_interes: parseFloat(document.getElementById("edit-tasa_interes").value),
+            plazo: parseInt(document.getElementById("edit-plazo").value),
+            fecha_otorgamiento: document.getElementById("edit-fecha_otorgamiento").value
+        };
+
+        let response = await fetch(`/creditos/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            Swal.fire({
+                icon: "success",
+                title: "¡Crédito actualizado!",
+                text: "El crédito ha sido actualizado exitosamente.",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                let modal = bootstrap.Modal.getInstance(document.getElementById("modalEditarCredito"));
+                modal.hide();
+                cargarCreditos(); 
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema al actualizar el crédito. Inténtalo de nuevo.",
+            });
         }
     });
-
-    if (!valido) return;
-
-    let id = document.getElementById("edit-id").value;
-    let data = {
-        cliente: document.getElementById("edit-cliente").value,
-        monto: parseFloat(document.getElementById("edit-monto").value),
-        tasa_interes: parseFloat(document.getElementById("edit-tasa_interes").value),
-        plazo: parseInt(document.getElementById("edit-plazo").value),
-        fecha_otorgamiento: document.getElementById("edit-fecha_otorgamiento").value
-    };
-
-    let response = await fetch(`/creditos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
-
-    if (response.ok) {
-        Swal.fire({
-            icon: "success",
-            title: "¡Crédito actualizado!",
-            text: "El crédito ha sido actualizado exitosamente.",
-            timer: 1500,
-            showConfirmButton: false
-        }).then(() => {
-            let modal = bootstrap.Modal.getInstance(document.getElementById("modalEditarCredito"));
-            modal.hide();
-            cargarCreditos(); 
-        });
-    } else {
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Hubo un problema al actualizar el crédito. Inténtalo de nuevo.",
-        });
-    }
 });
 
 // Function to delete a credit
