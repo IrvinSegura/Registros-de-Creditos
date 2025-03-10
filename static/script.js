@@ -124,10 +124,12 @@ async function enviarDatos(method, url, data) {
             }
         });
     } else {
+        let data = await response.json();
+        let errorMsg = data?.cliente || data?.monto || data?.tasa_interes || data?.plazo || data?.fecha_otorgamiento || "Error desconocido";
         Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Hubo un problema al procesar los datos. Inténtalo de nuevo.",
+            text: errorMsg,
         });
     }
 }
