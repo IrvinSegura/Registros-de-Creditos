@@ -110,3 +110,8 @@ body {
     background-color: gray;
     color: white;
 }
+
+#creditosChart {
+    width: 1200px !important;
+    height: 300px !important;
+}
