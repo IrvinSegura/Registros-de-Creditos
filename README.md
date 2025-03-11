@@ -45,3 +45,11 @@ python app.py
 http://127.0.0.1:5000/
 ```
 <br>
+
+![image](https://github.com/user-attachments/assets/05947930-722f-47b2-b8eb-c0b8cbf3e715)
+![image](https://github.com/user-attachments/assets/4fd6cb11-8429-4b87-8fd8-71d61e265eb7)
+![image](https://github.com/user-attachments/assets/cecda054-9030-4c62-a22f-89b6118b8e1e)
+![image](https://github.com/user-attachments/assets/88c6c9e8-1352-47c5-8ce4-39318e0f3fca)
+
+
+
