@@ -1,0 +1,72 @@
+<section class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab" tabindex="0">
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card app-card kpi-card h-100">
+                <div class="card-body">
+                    <span class="kpi-icon kpi-icon-primary" aria-hidden="true"><i class="bi bi-files"></i></span>
+                    <p class="kpi-label">Créditos registrados</p>
+                    <p class="kpi-value" id="kpi-total-credits">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card app-card kpi-card h-100">
+                <div class="card-body">
+                    <span class="kpi-icon kpi-icon-success" aria-hidden="true"><i class="bi bi-cash-stack"></i></span>
+                    <p class="kpi-label">Monto total otorgado</p>
+                    <p class="kpi-value" id="kpi-total-amount">—</p>
+                    <p class="kpi-hint" id="kpi-average-amount"></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card app-card kpi-card h-100">
+                <div class="card-body">
+                    <span class="kpi-icon kpi-icon-warning" aria-hidden="true"><i class="bi bi-percent"></i></span>
+                    <p class="kpi-label">Tasa promedio</p>
+                    <p class="kpi-value" id="kpi-average-rate">—</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card app-card kpi-card h-100">
+                <div class="card-body">
+                    <span class="kpi-icon kpi-icon-info" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+                    <p class="kpi-label">Plazo promedio</p>
+                    <p class="kpi-value" id="kpi-average-term">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3" id="stats-charts">
+        <div class="col-12 col-lg-8">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-1">Monto otorgado por mes</h2>
+                    <p class="small text-body-secondary mb-3">Suma de los créditos según su fecha de otorgamiento.</p>
+                    <div class="chart-box">
+                        <canvas id="monthly-chart" aria-label="Gráfica de monto otorgado por mes" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-1">Créditos por plazo</h2>
+                    <p class="small text-body-secondary mb-3">Distribución de la cartera por rango de meses.</p>
+                    <div class="chart-box">
+                        <canvas id="term-chart" aria-label="Gráfica de créditos por plazo" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card app-card empty-state d-none" id="stats-empty">
+        <span class="empty-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
+        <p class="fw-semibold mb-1">Aún no hay datos para mostrar</p>
+        <p class="text-body-secondary mb-0">Las estadísticas aparecerán cuando registres el primer crédito.</p>
+    </div>
+</section>
