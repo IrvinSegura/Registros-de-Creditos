@@ -1,0 +1,88 @@
+<div class="card app-card">
+    <div class="card-body p-4 pb-3">
+        <div class="toolbar">
+            <div class="search-box">
+                <label for="credit-search" class="visually-hidden">Buscar por cliente</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                    <input type="search" id="credit-search" class="form-control" placeholder="Buscar por cliente" autocomplete="off">
+                </div>
+            </div>
+            <div class="toolbar-actions">
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#credit-filters"
+                        aria-expanded="false" aria-controls="credit-filters" id="filters-toggle">
+                    <i class="bi bi-funnel" aria-hidden="true"></i> Filtros
+                    <span class="badge rounded-pill bg-primary ms-1" id="filters-count" hidden></span>
+                </button>
+                <a class="btn btn-outline-secondary" id="export-csv" href="/api/v1/credits/export" download>
+                    <i class="bi bi-download" aria-hidden="true"></i> Exportar CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="collapse" id="credit-filters">
+            <form class="filters-panel" id="filters-form" novalidate>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <label for="filter-date-from" class="form-label">Otorgado desde</label>
+                        <input type="date" class="form-control" id="filter-date-from" name="issue_date_from">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="filter-date-to" class="form-label">Otorgado hasta</label>
+                        <input type="date" class="form-control" id="filter-date-to" name="issue_date_to">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="filter-amount-min" class="form-label">Monto mínimo</label>
+                        <input type="number" class="form-control" id="filter-amount-min" name="amount_min" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label for="filter-amount-max" class="form-label">Monto máximo</label>
+                        <input type="number" class="form-control" id="filter-amount-max" name="amount_max" min="0" step="0.01" placeholder="Sin límite">
+                    </div>
+                </div>
+                <p class="small text-danger mt-2 mb-0" id="filters-error" role="alert"></p>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-link text-body-secondary" id="filters-clear">Limpiar filtros</button>
+                    <button type="submit" class="btn btn-primary">Aplicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col" aria-sort="none"><button type="button" class="sort-btn" data-sort="client_name">Cliente</button></th>
+                    <th scope="col" class="text-end" aria-sort="none"><button type="button" class="sort-btn" data-sort="amount">Monto</button></th>
+                    <th scope="col" class="text-end" aria-sort="none"><button type="button" class="sort-btn" data-sort="interest_rate">Tasa anual</button></th>
+                    <th scope="col" class="text-end" aria-sort="none"><button type="button" class="sort-btn" data-sort="term_months">Plazo</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="sort-btn" data-sort="issue_date">Otorgado</button></th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Acciones</span></th>
+                </tr>
+            </thead>
+            <tbody id="credits-body" aria-live="polite"></tbody>
+        </table>
+    </div>
+
+    <div class="empty-state" id="credits-empty" hidden>
+        <span class="empty-icon" aria-hidden="true"><i class="bi bi-inbox"></i></span>
+        <p class="fw-semibold mb-1" id="credits-empty-title"></p>
+        <p class="text-body-secondary mb-3" id="credits-empty-text"></p>
+        <a href="#/nuevo" class="btn btn-primary btn-sm" id="credits-empty-action">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar crédito
+        </a>
+    </div>
+
+    <div class="card-footer app-card-footer d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
+        <span id="page-info" class="small text-body-secondary"></span>
+        <div class="btn-group" role="group" aria-label="Paginación">
+            <button type="button" id="prev-page" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+            </button>
+            <button type="button" id="next-page" class="btn btn-outline-secondary btn-sm">
+                Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+</div>

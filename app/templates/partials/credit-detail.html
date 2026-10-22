@@ -1,0 +1,71 @@
+<div class="offcanvas offcanvas-end credit-detail" tabindex="-1" id="credit-detail" aria-labelledby="credit-detail-title">
+    <div class="offcanvas-header">
+        <div class="d-flex align-items-center gap-3">
+            <span class="avatar avatar-lg" id="detail-avatar" aria-hidden="true"></span>
+            <div>
+                <h2 class="offcanvas-title h5 mb-0" id="credit-detail-title">Crédito</h2>
+                <p class="small text-body-secondary mb-0" id="detail-subtitle"></p>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div class="detail-stats">
+            <div><span>Monto</span><strong id="detail-amount">—</strong></div>
+            <div><span>Tasa anual</span><strong id="detail-rate">—</strong></div>
+            <div><span>Plazo</span><strong id="detail-term">—</strong></div>
+            <div class="detail-stat-highlight"><span>Cuota mensual</span><strong id="detail-payment">—</strong></div>
+            <div><span>Intereses totales</span><strong id="detail-interest">—</strong></div>
+            <div><span>Total a pagar</span><strong id="detail-total">—</strong></div>
+        </div>
+
+        <ul class="nav nav-underline detail-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="detail-schedule-tab" data-bs-toggle="tab" data-bs-target="#detail-schedule"
+                        type="button" role="tab" aria-controls="detail-schedule" aria-selected="true">Amortización</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="detail-history-tab" data-bs-toggle="tab" data-bs-target="#detail-history"
+                        type="button" role="tab" aria-controls="detail-history" aria-selected="false">
+                    Historial <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis" id="detail-history-count"></span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="detail-schedule" role="tabpanel" aria-labelledby="detail-schedule-tab" tabindex="0">
+                <div class="schedule-wrapper">
+                    <table class="table table-sm schedule-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col" class="text-end">Cuota</th>
+                                <th scope="col" class="text-end">Interés</th>
+                                <th scope="col" class="text-end">Capital</th>
+                                <th scope="col" class="text-end">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-schedule-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="detail-history" role="tabpanel" aria-labelledby="detail-history-tab" tabindex="0">
+                <ol class="timeline" id="detail-history-list"></ol>
+                <p class="text-body-secondary small" id="detail-history-empty" hidden>
+                    Este crédito no tiene cambios registrados desde que se activó el historial.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="credit-detail-footer">
+        <button type="button" class="btn btn-outline-danger" id="detail-delete">
+            <i class="bi bi-trash3" aria-hidden="true"></i> Eliminar
+        </button>
+        <button type="button" class="btn btn-primary" id="detail-edit">
+            <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+        </button>
+    </div>
+</div>
