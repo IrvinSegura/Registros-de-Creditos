@@ -1,0 +1,104 @@
+<div class="period-bar mb-4">
+    <div class="btn-group period-presets" role="group" aria-label="Periodo">
+        <button type="button" class="btn btn-outline-secondary active" data-period="all" aria-pressed="true">Todo</button>
+        <button type="button" class="btn btn-outline-secondary" data-period="year" aria-pressed="false">Este año</button>
+        <button type="button" class="btn btn-outline-secondary" data-period="last12" aria-pressed="false">Últimos 12 meses</button>
+        <button type="button" class="btn btn-outline-secondary" data-period="custom" aria-pressed="false">Personalizado</button>
+    </div>
+    <form class="period-custom" id="period-form" hidden novalidate>
+        <label for="period-from" class="visually-hidden">Desde</label>
+        <input type="date" class="form-control form-control-sm" id="period-from" required>
+        <span class="text-body-secondary small">a</span>
+        <label for="period-to" class="visually-hidden">Hasta</label>
+        <input type="date" class="form-control form-control-sm" id="period-to" required>
+        <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
+    </form>
+    <span class="period-label ms-lg-auto" id="period-label"></span>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-12 col-sm-6 col-xxl-3">
+        <div class="card app-card kpi-card h-100">
+            <div class="card-body">
+                <span class="kpi-icon kpi-icon-primary" aria-hidden="true"><i class="bi bi-files"></i></span>
+                <p class="kpi-label">Créditos otorgados</p>
+                <p class="kpi-value" id="kpi-total-credits">—</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xxl-3">
+        <div class="card app-card kpi-card h-100">
+            <div class="card-body">
+                <span class="kpi-icon kpi-icon-success" aria-hidden="true"><i class="bi bi-cash-stack"></i></span>
+                <p class="kpi-label">Monto total otorgado</p>
+                <p class="kpi-value" id="kpi-total-amount">—</p>
+                <p class="kpi-hint" id="kpi-average-amount"></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xxl-3">
+        <div class="card app-card kpi-card h-100">
+            <div class="card-body">
+                <span class="kpi-icon kpi-icon-warning" aria-hidden="true"><i class="bi bi-percent"></i></span>
+                <p class="kpi-label">Tasa anual promedio</p>
+                <p class="kpi-value" id="kpi-average-rate">—</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xxl-3">
+        <div class="card app-card kpi-card h-100">
+            <div class="card-body">
+                <span class="kpi-icon kpi-icon-info" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+                <p class="kpi-label">Plazo promedio</p>
+                <p class="kpi-value" id="kpi-average-term">—</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard-content">
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-xl-8">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-1">Monto otorgado por mes</h2>
+                    <p class="small text-body-secondary mb-3">Suma de los créditos según su fecha de otorgamiento.</p>
+                    <div class="chart-box">
+                        <canvas id="monthly-chart" aria-label="Gráfica de monto otorgado por mes" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-1">Créditos por plazo</h2>
+                    <p class="small text-body-secondary mb-3">Distribución por rango de meses.</p>
+                    <div class="chart-box">
+                        <canvas id="term-chart" aria-label="Gráfica de créditos por plazo" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card app-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h2 class="h6 mb-1">Clientes con mayor monto</h2>
+                    <p class="small text-body-secondary mb-0">Los 5 clientes con más monto otorgado en el periodo.</p>
+                </div>
+                <i class="bi bi-trophy text-warning fs-4" aria-hidden="true"></i>
+            </div>
+            <ol class="top-clients" id="top-clients"></ol>
+        </div>
+    </div>
+</div>
+
+<div class="card app-card empty-state" id="dashboard-empty" hidden>
+    <span class="empty-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
+    <p class="fw-semibold mb-1">Sin créditos en este periodo</p>
+    <p class="text-body-secondary mb-3">Cambia el periodo o registra un crédito para ver las estadísticas.</p>
+    <a href="#/nuevo" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar crédito</a>
+</div>
