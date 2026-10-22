@@ -134,3 +134,37 @@ def test_home_page_and_api_docs(client):
     assert client.get("/api/docs").status_code == 200
     spec = client.get("/api/openapi.json").get_json()
     assert "/api/v1/credits" in spec["paths"]
+
+
+def test_summary_of_an_empty_portfolio(client):
+    body = client.get(f"{URL}/summary").get_json()
+
+    assert body["total_credits"] == 0
+    assert body["total_amount"] == "0.00"
+    assert body["average_term_months"] == "0.0"
+    assert body["monthly"] == []
+    assert [r["credits"] for r in body["by_term"]] == [0, 0, 0, 0]
+
+
+def test_summary_aggregates_the_portfolio(client, create_credit):
+    create_credit(amount=1000, interest_rate=10, term_months=12, issue_date="2026-01-10")
+    create_credit(amount=2000.5, interest_rate=20, term_months=24, issue_date="2026-01-20")
+    create_credit(amount=3000, interest_rate=15, term_months=48, issue_date="2026-03-05")
+
+    body = client.get(f"{URL}/summary").get_json()
+
+    assert body["total_credits"] == 3
+    assert body["total_amount"] == "6000.50"
+    assert body["average_amount"] == "2000.17"
+    assert body["average_interest_rate"] == "15.00"
+    assert body["average_term_months"] == "28.0"
+    assert body["monthly"] == [
+        {"year": 2026, "month": 1, "credits": 2, "total_amount": "3000.50"},
+        {"year": 2026, "month": 3, "credits": 1, "total_amount": "3000.00"},
+    ]
+    assert body["by_term"] == [
+        {"range": "1-12", "credits": 1},
+        {"range": "13-24", "credits": 1},
+        {"range": "25-36", "credits": 0},
+        {"range": "37+", "credits": 1},
+    ]

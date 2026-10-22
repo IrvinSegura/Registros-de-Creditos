@@ -3,7 +3,7 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint
 
-from app.schemas import CreditPageSchema, CreditQuerySchema, CreditSchema
+from app.schemas import CreditPageSchema, CreditQuerySchema, CreditSchema, CreditSummarySchema
 from app.services import credit_service
 
 blp = Blueprint("credits", __name__, url_prefix="/api/v1/credits", description="Credit registration and lookup.")
@@ -26,6 +26,14 @@ class CreditsResource(MethodView):
     def post(self, data):
         """Register a new credit."""
         return credit_service.create_credit(data)
+
+
+@blp.route("/summary")
+class CreditSummaryResource(MethodView):
+    @blp.response(200, CreditSummarySchema)
+    def get(self):
+        """Portfolio totals and breakdowns for the dashboard."""
+        return credit_service.get_summary()
 
 
 @blp.route("/<int:credit_id>")
