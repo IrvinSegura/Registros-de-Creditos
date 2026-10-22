@@ -6,6 +6,7 @@ const currentTheme = () => document.documentElement.getAttribute("data-bs-theme"
 function renderToggle(button) {
     const dark = currentTheme() === "dark";
     button.querySelector("i").className = dark ? "bi bi-sun" : "bi bi-moon-stars";
+    button.querySelector("span").textContent = dark ? "Tema claro" : "Tema oscuro";
     button.setAttribute("aria-label", dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
 }
 
