@@ -16,10 +16,11 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 - **Chart.js** (Generación de gráficos estadísticos).<br>
 ## 🚀 Funcionalidades
 ✅ Registro de nuevos créditos mediante un formulario.<br>
-✅ Listado de créditos en una tabla con paginación.<br>
+✅ Listado de créditos con paginación y búsqueda por cliente.<br>
 ✅ Edición y eliminación de créditos existentes.<br>
-✅ Validaciones en los formularios para evitar datos incorrectos.<br>
-✅ Visualización gráfica de los créditos otorgados.<br>
+✅ Validaciones en los formularios, alineadas con las de la API.<br>
+✅ Panel de estadísticas: indicadores de cartera, monto por mes y créditos por plazo.<br>
+✅ Tema claro y oscuro, y diseño adaptable a móvil.<br>
 <br>
 ## 🔧 Instalación y Configuración
 ### 1️⃣ Requisitos Previos
@@ -72,7 +73,18 @@ app/
 ├── api/v1/            # Endpoints REST versionados
 ├── web/               # Páginas renderizadas en el servidor
 ├── templates/
+│   ├── base.html      # Layout: encabezado, tema claro/oscuro y librerías
+│   ├── index.html     # Página principal con las pestañas
+│   ├── macros/        # Campos de formulario compartidos
+│   └── partials/      # Un archivo por módulo: registro, tabla, estadísticas y edición
 └── static/
+    ├── css/app.css    # Estilos y variables de diseño (tema claro y oscuro)
+    └── js/
+        ├── main.js    # Punto de entrada que conecta los módulos
+        ├── api.js     # Cliente de la API REST
+        ├── forms.js   # Validación y lectura de formularios
+        ├── format.js  # Formato de moneda, fechas y porcentajes (es-MX)
+        └── modules/   # register-form, credit-table, edit-modal y stats
 migrations/            # Migraciones de base de datos (Alembic)
 tests/                 # Pruebas con pytest
 wsgi.py                # Punto de entrada
@@ -88,6 +100,7 @@ La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especif
 | `GET` | `/api/v1/credits/{id}` | Obtiene un crédito |
 | `PUT` | `/api/v1/credits/{id}` | Actualiza un crédito |
 | `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito |
+| `GET` | `/api/v1/credits/summary` | Totales, promedios, monto por mes y créditos por plazo |
 
 Los montos y tasas se manejan como decimales exactos y se devuelven como texto (`"15000.50"`). Los errores siguen siempre el mismo formato:
 ```json
