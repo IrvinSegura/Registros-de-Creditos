@@ -7,6 +7,7 @@ from app.api.v1 import blueprints as api_v1_blueprints
 from app.config import DEFAULT_SECRET_KEY, BaseConfig, get_config
 from app.errors import register_error_handlers
 from app.extensions import api, cors, db, migrate
+from app.security import register_security_headers
 from app.web import web_bp
 
 
@@ -25,6 +26,7 @@ def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
         api.register_blueprint(blueprint)
     app.register_blueprint(web_bp)
     register_error_handlers(app)
+    register_security_headers(app)
 
     return app
 
