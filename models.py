@@ -2,7 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Credito(db.Model):
+
+class Credit(db.Model):
+    # Legacy table and column names are kept so existing databases keep working
+    __tablename__ = "credito"
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     cliente = db.Column(db.String(100), nullable=False)
     monto = db.Column(db.Float, nullable=False)

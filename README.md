@@ -36,7 +36,10 @@ python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 
 # Instalar las dependencias
-pip install flask flask_sqlalchemy flask_cors
+pip install -r requirements.txt
+
+# (Opcional) Configurar variables de entorno
+cp .env.example .env
 
 # Ejecutar la aplicación
 python app.py
