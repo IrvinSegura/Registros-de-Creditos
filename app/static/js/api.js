@@ -23,17 +23,28 @@ async function request(url, options = {}) {
     return body;
 }
 
+// Builds a query string, leaving out empty values
+function toQuery(params) {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") query.set(key, value);
+    });
+    const text = query.toString();
+    return text ? `?${text}` : "";
+}
+
 export const creditsApi = {
-    list({ page = 1, perPage = 10, clientName = "" } = {}) {
-        const params = new URLSearchParams({ page, per_page: perPage });
-        if (clientName) params.set("client_name", clientName);
-        return request(`${BASE_URL}?${params}`);
-    },
+    list: ({ page = 1, perPage = 10, ...filters } = {}) => request(`${BASE_URL}${toQuery({ page, per_page: perPage, ...filters })}`),
     get: id => request(`${BASE_URL}/${id}`),
     create: data => request(BASE_URL, { method: "POST", body: JSON.stringify(data) }),
     update: (id, data) => request(`${BASE_URL}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     remove: id => request(`${BASE_URL}/${id}`, { method: "DELETE" }),
-    summary: () => request(`${BASE_URL}/summary`),
+    summary: (period = {}) => request(`${BASE_URL}/summary${toQuery(period)}`),
+    quote: terms => request(`${BASE_URL}/quote${toQuery(terms)}`),
+    amortization: id => request(`${BASE_URL}/${id}/amortization`),
+    history: id => request(`${BASE_URL}/${id}/history`),
+    // The CSV is downloaded by the browser through a plain link
+    exportUrl: filters => `${BASE_URL}/export${toQuery(filters)}`,
 };
 
 // Message safe to show to the user: API errors carry Spanish text, network errors do not

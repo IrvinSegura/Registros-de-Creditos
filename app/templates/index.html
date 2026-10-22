@@ -1,29 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<ul class="nav app-tabs mb-4" id="credit-tabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="true">
-            <i class="bi bi-plus-circle" aria-hidden="true"></i><span>Registro</span>
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="false">
-            <i class="bi bi-table" aria-hidden="true"></i><span>Créditos</span>
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
-            <i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>Estadísticas</span>
-        </button>
-    </li>
-</ul>
+{# Each view is shown by the client-side router (static/js/router.js) based on the URL hash #}
+<section class="app-view" data-view="dashboard" hidden>
+    {% include "partials/dashboard.html" %}
+</section>
+<section class="app-view" data-view="credits" hidden>
+    {% include "partials/credits.html" %}
+</section>
+<section class="app-view" data-view="register" hidden>
+    {% include "partials/register.html" %}
+</section>
+{% endblock %}
 
-<div class="tab-content" id="credit-tabs-content">
-    {% include "partials/register-form.html" %}
-    {% include "partials/credit-table.html" %}
-    {% include "partials/stats.html" %}
-</div>
-
+{% block overlays %}
+{% include "partials/credit-detail.html" %}
 {% include "partials/edit-modal.html" %}
 {% endblock %}

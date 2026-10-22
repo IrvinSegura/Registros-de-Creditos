@@ -15,12 +15,14 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 - **SweetAlert2** (Alertas interactivas y modernas).
 - **Chart.js** (Generación de gráficos estadísticos).<br>
 ## 🚀 Funcionalidades
-✅ Registro de nuevos créditos mediante un formulario.<br>
-✅ Listado de créditos con paginación y búsqueda por cliente.<br>
-✅ Edición y eliminación de créditos existentes.<br>
+✅ Registro de créditos con **simulación en vivo de la cuota mensual** (sistema de cuota fija).<br>
+✅ **Tabla de amortización** de cada crédito: fecha, cuota, interés, capital y saldo.<br>
+✅ **Historial de cambios** de cada crédito: qué campo cambió, el valor anterior y el nuevo.<br>
+✅ Listado con búsqueda, **orden por columna**, **filtros por fechas y montos**, paginación y **exportación a CSV**.<br>
+✅ Panel con **filtro de periodo**, indicadores de cartera, monto por mes, créditos por plazo y **clientes con mayor monto**.<br>
 ✅ Validaciones en los formularios, alineadas con las de la API.<br>
-✅ Panel de estadísticas: indicadores de cartera, monto por mes y créditos por plazo.<br>
-✅ Tema claro y oscuro, y diseño adaptable a móvil.<br>
+✅ Menú lateral, tema claro y oscuro, y diseño adaptable a móvil.<br>
+✅ Cabeceras de seguridad (CSP con nonce, X-Frame-Options, nosniff) y librerías del CDN con **hashes de integridad (SRI)**.<br>
 <br>
 ## 🔧 Instalación y Configuración
 ### 1️⃣ Requisitos Previos
@@ -67,24 +69,27 @@ app/
 ├── config.py          # Configuración por entorno
 ├── extensions.py      # SQLAlchemy, Migrate, Api (OpenAPI), CORS
 ├── errors.py          # Errores de dominio y su respuesta JSON
-├── models/            # Modelos SQLAlchemy
+├── security.py        # Cabeceras de seguridad y Content Security Policy
+├── models/            # Modelos SQLAlchemy: crédito e historial de cambios
 ├── schemas/           # Validación y serialización (marshmallow)
-├── services/          # Lógica de negocio, sin dependencias de HTTP
+├── services/          # Lógica de negocio y cálculo de amortización, sin dependencias de HTTP
 ├── api/v1/            # Endpoints REST versionados
 ├── web/               # Páginas renderizadas en el servidor
 ├── templates/
-│   ├── base.html      # Layout: encabezado, tema claro/oscuro y librerías
-│   ├── index.html     # Página principal con las pestañas
+│   ├── base.html      # Layout: menú lateral, barra superior, tema y librerías
+│   ├── index.html     # Vistas de la aplicación
 │   ├── macros/        # Campos de formulario compartidos
-│   └── partials/      # Un archivo por módulo: registro, tabla, estadísticas y edición
+│   └── partials/      # Un archivo por vista o panel: dashboard, credits, register, credit-detail, edit-modal
 └── static/
     ├── css/app.css    # Estilos y variables de diseño (tema claro y oscuro)
+    ├── img/           # Favicon
     └── js/
         ├── main.js    # Punto de entrada que conecta los módulos
+        ├── router.js  # Navegación entre vistas (#/panel, #/creditos, #/nuevo)
         ├── api.js     # Cliente de la API REST
         ├── forms.js   # Validación y lectura de formularios
         ├── format.js  # Formato de moneda, fechas y porcentajes (es-MX)
-        └── modules/   # register-form, credit-table, edit-modal y stats
+        └── modules/   # dashboard, credits, register, credit-detail y edit-modal
 migrations/            # Migraciones de base de datos (Alembic)
 tests/                 # Pruebas con pytest
 wsgi.py                # Punto de entrada
@@ -95,12 +100,18 @@ La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especif
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/api/v1/credits?page=1&per_page=10&client_name=ana` | Lista paginada con filtro opcional por cliente |
+| `GET` | `/api/v1/credits` | Lista paginada. Filtros: `client_name`, `issue_date_from`, `issue_date_to`, `amount_min`, `amount_max`. Orden: `sort` y `order` (`asc`/`desc`) |
 | `POST` | `/api/v1/credits` | Registra un crédito |
+| `GET` | `/api/v1/credits/export` | Descarga en CSV los créditos con los mismos filtros y orden |
+| `GET` | `/api/v1/credits/quote?amount=10000&interest_rate=12&term_months=12` | Simula la cuota mensual, los intereses y el total a pagar |
+| `GET` | `/api/v1/credits/summary` | Totales, promedios, monto por mes, créditos por plazo y clientes con mayor monto; acepta `issue_date_from` e `issue_date_to` |
 | `GET` | `/api/v1/credits/{id}` | Obtiene un crédito |
 | `PUT` | `/api/v1/credits/{id}` | Actualiza un crédito |
-| `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito |
-| `GET` | `/api/v1/credits/summary` | Totales, promedios, monto por mes y créditos por plazo |
+| `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito y su historial |
+| `GET` | `/api/v1/credits/{id}/amortization` | Tabla de amortización del crédito |
+| `GET` | `/api/v1/credits/{id}/history` | Historial de cambios, del más reciente al más antiguo |
+
+La tasa de interés es **anual** y se paga mensualmente. La cuota se calcula con el sistema de cuota fija (francés) y la última cuota absorbe el redondeo para que el saldo termine exactamente en cero.
 
 Los montos y tasas se manejan como decimales exactos y se devuelven como texto (`"15000.50"`). Los errores siguen siempre el mismo formato:
 ```json
