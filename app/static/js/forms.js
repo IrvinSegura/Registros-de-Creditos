@@ -23,6 +23,11 @@ function setFieldError(input, message) {
     if (feedback) feedback.textContent = message;
 }
 
+// True when a raw value passes the rule of its field (used without touching the form UI)
+export function isValidValue(name, value) {
+    return VALIDATORS[name]?.(String(value).trim()) === true;
+}
+
 export function validateField(input) {
     if (!(input.name in VALIDATORS)) return true;
     const result = VALIDATORS[input.name](input.value.trim());
