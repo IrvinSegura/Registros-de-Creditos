@@ -80,3 +80,25 @@ class PaginationSchema(Schema):
 class CreditPageSchema(Schema):
     items = fields.List(fields.Nested(CreditSchema))
     meta = fields.Nested(PaginationSchema)
+
+
+class MonthlyTotalSchema(Schema):
+    year = fields.Integer()
+    month = fields.Integer()
+    credits = fields.Integer()
+    total_amount = fields.Decimal(places=2, as_string=True)
+
+
+class TermRangeSchema(Schema):
+    range = fields.String(metadata={"description": "Term bucket in months: 1-12, 13-24, 25-36 or 37+."})
+    credits = fields.Integer()
+
+
+class CreditSummarySchema(Schema):
+    total_credits = fields.Integer()
+    total_amount = fields.Decimal(places=2, as_string=True)
+    average_amount = fields.Decimal(places=2, as_string=True)
+    average_interest_rate = fields.Decimal(places=2, as_string=True)
+    average_term_months = fields.Decimal(places=1, as_string=True)
+    monthly = fields.List(fields.Nested(MonthlyTotalSchema))
+    by_term = fields.List(fields.Nested(TermRangeSchema))

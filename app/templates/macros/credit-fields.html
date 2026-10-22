@@ -1,0 +1,51 @@
+{# Credit form fields shared by the register form and the edit modal.
+   Input names match the API fields; ids are prefixed so both forms can coexist. #}
+{% macro credit_fields(prefix="") %}
+<div class="row g-3">
+    <div class="col-12 col-md-7">
+        <label for="{{ prefix }}client_name" class="form-label">Cliente</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+            <input type="text" id="{{ prefix }}client_name" name="client_name" class="form-control" placeholder="Ej. María López"
+                   autocomplete="off" maxlength="100" required aria-describedby="{{ prefix }}client_name-error">
+            <div class="invalid-feedback" id="{{ prefix }}client_name-error"></div>
+        </div>
+    </div>
+    <div class="col-12 col-md-5">
+        <label for="{{ prefix }}issue_date" class="form-label">Fecha de otorgamiento</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+            <input type="date" id="{{ prefix }}issue_date" name="issue_date" class="form-control" min="2000-01-01" required
+                   aria-describedby="{{ prefix }}issue_date-error">
+            <div class="invalid-feedback" id="{{ prefix }}issue_date-error"></div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <label for="{{ prefix }}amount" class="form-label">Monto</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text">$</span>
+            <input type="number" id="{{ prefix }}amount" name="amount" class="form-control" placeholder="0.00" step="0.01" min="0.01"
+                   inputmode="decimal" required aria-describedby="{{ prefix }}amount-error">
+            <div class="invalid-feedback" id="{{ prefix }}amount-error"></div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <label for="{{ prefix }}interest_rate" class="form-label">Tasa de interés</label>
+        <div class="input-group has-validation">
+            <input type="number" id="{{ prefix }}interest_rate" name="interest_rate" class="form-control" placeholder="0.00" step="0.01"
+                   min="0.01" max="100" inputmode="decimal" required aria-describedby="{{ prefix }}interest_rate-error">
+            <span class="input-group-text">%</span>
+            <div class="invalid-feedback" id="{{ prefix }}interest_rate-error"></div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <label for="{{ prefix }}term_months" class="form-label">Plazo</label>
+        <div class="input-group has-validation">
+            <input type="number" id="{{ prefix }}term_months" name="term_months" class="form-control" placeholder="12" step="1" min="1"
+                   max="360" inputmode="numeric" required aria-describedby="{{ prefix }}term_months-error">
+            <span class="input-group-text">meses</span>
+            <div class="invalid-feedback" id="{{ prefix }}term_months-error"></div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
