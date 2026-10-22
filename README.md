@@ -7,7 +7,8 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 ### Backend
 - **Python** con **Flask** (Framework ligero para aplicaciones web).
 - **SQLite** (Base de datos liviana y embebida).
-- **SQLAlchemy** (ORM para manejar la base de datos con facilidad).
+- **SQLAlchemy** (ORM) y **Flask-Migrate / Alembic** (migraciones de base de datos).
+- **marshmallow** y **flask-smorest** (validación, serialización y documentación OpenAPI).
 ### Frontend
 - **HTML, CSS y JavaScript** (Interfaz de usuario).
 - **Bootstrap** (Diseño responsivo y atractivo).
@@ -22,30 +23,87 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 <br>
 ## 🔧 Instalación y Configuración
 ### 1️⃣ Requisitos Previos
-- Tener instalado **Python 3.x**.
-- Disponer de **Git** para clonar el repositorio.
-- Instalar **un entorno virtual (opcional pero recomendado)**.<br>
+- **Python 3.11** o superior.
+- **Git** para clonar el repositorio.
 ### 2️⃣ Pasos de Instalación
 ```sh
 # Clonar el repositorio
 git clone https://github.com/IrvinSegura/Registros-de-Creditos
 cd Registros-de-Creditos
 
-# Crear y activar un entorno virtual (Opcional pero recomendado)
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+# Crear y activar un entorno virtual
+python -m venv .venv
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 
-# Instalar las dependencias
-pip install -r requirements.txt
+# Instalar las dependencias (incluye las de desarrollo y pruebas)
+pip install -r requirements-dev.txt
 
-# (Opcional) Configurar variables de entorno
+# Configurar variables de entorno
 cp .env.example .env
 
+# Crear la base de datos aplicando las migraciones
+flask db upgrade
+
 # Ejecutar la aplicación
-python app.py
+flask run
 
 # Acceder a la aplicación en el navegador
 http://127.0.0.1:5000/
+```
+
+### 3️⃣ Variables de entorno
+| Variable | Descripción | Valor por defecto |
+|---|---|---|
+| `APP_ENV` | `development`, `testing` o `production` | `development` |
+| `SECRET_KEY` | Clave secreta de Flask (obligatoria en producción) | solo para desarrollo |
+| `DATABASE_URL` | URL de la base de datos (las rutas SQLite relativas se crean en `instance/`) | `sqlite:///credits.db` |
+| `CORS_ORIGINS` | Orígenes permitidos para llamar a `/api/*` desde otro dominio, separados por comas | vacío (ninguno) |
+
+## 🗂 Estructura del proyecto
+```
+app/
+├── __init__.py        # Application factory (create_app)
+├── config.py          # Configuración por entorno
+├── extensions.py      # SQLAlchemy, Migrate, Api (OpenAPI), CORS
+├── errors.py          # Errores de dominio y su respuesta JSON
+├── models/            # Modelos SQLAlchemy
+├── schemas/           # Validación y serialización (marshmallow)
+├── services/          # Lógica de negocio, sin dependencias de HTTP
+├── api/v1/            # Endpoints REST versionados
+├── web/               # Páginas renderizadas en el servidor
+├── templates/
+└── static/
+migrations/            # Migraciones de base de datos (Alembic)
+tests/                 # Pruebas con pytest
+wsgi.py                # Punto de entrada
+```
+
+## 📡 API REST
+La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especificación OpenAPI en `/api/openapi.json`.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/v1/credits?page=1&per_page=10&client_name=ana` | Lista paginada con filtro opcional por cliente |
+| `POST` | `/api/v1/credits` | Registra un crédito |
+| `GET` | `/api/v1/credits/{id}` | Obtiene un crédito |
+| `PUT` | `/api/v1/credits/{id}` | Actualiza un crédito |
+| `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito |
+
+Los montos y tasas se manejan como decimales exactos y se devuelven como texto (`"15000.50"`). Los errores siguen siempre el mismo formato:
+```json
+{"code": 422, "status": "Unprocessable Entity", "errors": {"json": {"term_months": ["El plazo debe estar entre 1 y 360 meses."]}}}
+```
+
+## 🧪 Pruebas
+```sh
+pytest
+```
+
+## 🗃 Migraciones
+```sh
+# Después de modificar un modelo
+flask db migrate -m "descripción del cambio"
+flask db upgrade
 ```
 <br>
 
