@@ -1,0 +1,59 @@
+<section class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab" tabindex="0">
+    <div class="card app-card">
+        <div class="card-body p-4 pb-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="section-heading">
+                    <span class="section-icon" aria-hidden="true"><i class="bi bi-collection"></i></span>
+                    <div>
+                        <h2 class="h4 mb-1">Créditos registrados <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis align-middle ms-1" id="credits-total">0</span></h2>
+                        <p class="text-body-secondary mb-0">Consulta, edita o elimina los créditos de la cartera.</p>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <label for="credit-search" class="visually-hidden">Buscar por cliente</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                        <input type="search" id="credit-search" class="form-control" placeholder="Buscar por cliente" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table app-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Cliente</th>
+                        <th scope="col" class="text-end">Monto</th>
+                        <th scope="col" class="text-end">Tasa</th>
+                        <th scope="col" class="text-end">Plazo</th>
+                        <th scope="col">Otorgado</th>
+                        <th scope="col" class="text-end"><span class="visually-hidden">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody id="credits-body" aria-live="polite"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state d-none" id="credits-empty">
+            <span class="empty-icon" aria-hidden="true"><i class="bi bi-inbox"></i></span>
+            <p class="fw-semibold mb-1" id="credits-empty-title"></p>
+            <p class="text-body-secondary mb-3" id="credits-empty-text"></p>
+            <button type="button" class="btn btn-primary btn-sm" id="credits-empty-action">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar crédito
+            </button>
+        </div>
+
+        <div class="card-footer app-card-footer d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
+            <span id="page-info" class="small text-body-secondary"></span>
+            <div class="btn-group" role="group" aria-label="Paginación">
+                <button type="button" id="prev-page" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+                </button>
+                <button type="button" id="next-page" class="btn btn-outline-secondary btn-sm">
+                    Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>

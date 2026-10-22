@@ -1,0 +1,27 @@
+{% from "macros/credit-fields.html" import credit_fields %}
+<div class="modal fade" id="edit-credit-modal" tabindex="-1" aria-labelledby="edit-credit-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form class="modal-content app-modal" id="edit-credit-form" novalidate>
+            <div class="modal-header">
+                <div class="section-heading">
+                    <span class="section-icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></span>
+                    <div>
+                        <h2 class="modal-title h5 mb-0" id="edit-credit-modal-label">Editar crédito</h2>
+                        <p class="small text-body-secondary mb-0" id="edit-credit-subtitle"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-id">
+                {{ credit_fields("edit-") }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" disabled>
+                    <i class="bi bi-save" aria-hidden="true"></i> Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
