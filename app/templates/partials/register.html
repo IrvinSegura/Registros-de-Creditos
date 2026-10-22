@@ -1,0 +1,72 @@
+{% from "macros/credit-fields.html" import credit_fields %}
+<div class="row g-4">
+    <div class="col-12 col-xl-7">
+        <div class="card app-card h-100">
+            <div class="card-body p-4">
+                <div class="section-heading mb-4">
+                    <span class="section-icon" aria-hidden="true"><i class="bi bi-file-earmark-plus"></i></span>
+                    <div>
+                        <h2 class="h5 mb-1">Datos del crédito</h2>
+                        <p class="text-body-secondary mb-0">Todos los campos son obligatorios. La tasa es anual y se paga mensualmente.</p>
+                    </div>
+                </div>
+                <form id="credit-form" novalidate>
+                    {{ credit_fields() }}
+                    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                        <button type="reset" class="btn btn-outline-secondary">
+                            <i class="bi bi-eraser" aria-hidden="true"></i> Limpiar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle" aria-hidden="true"></i> Registrar crédito
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+        <aside class="card app-card quote-card" aria-live="polite" aria-labelledby="quote-title">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h2 class="h6 mb-0" id="quote-title">Simulación</h2>
+                    <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">Cuota fija</span>
+                </div>
+
+                <div id="quote-empty" class="quote-empty">
+                    <i class="bi bi-calculator" aria-hidden="true"></i>
+                    <p class="mb-0">Captura el monto, la tasa y el plazo para estimar la cuota mensual.</p>
+                </div>
+
+                <div id="quote-result" hidden>
+                    <p class="quote-label">Cuota mensual estimada</p>
+                    <p class="quote-value" id="quote-payment">—</p>
+                    <p class="quote-hint" id="quote-terms"></p>
+
+                    <div class="quote-split" role="img" id="quote-split" aria-label="Proporción de capital e intereses">
+                        <span class="quote-split-principal" id="quote-split-principal"></span>
+                        <span class="quote-split-interest" id="quote-split-interest"></span>
+                    </div>
+
+                    <dl class="quote-list">
+                        <div>
+                            <dt><span class="dot dot-principal" aria-hidden="true"></span>Capital</dt>
+                            <dd id="quote-principal">—</dd>
+                        </div>
+                        <div>
+                            <dt><span class="dot dot-interest" aria-hidden="true"></span>Intereses totales</dt>
+                            <dd id="quote-interest">—</dd>
+                        </div>
+                        <div class="quote-total">
+                            <dt>Total a pagar</dt>
+                            <dd id="quote-total">—</dd>
+                        </div>
+                    </dl>
+                    <p class="small text-body-secondary mb-0">
+                        Al registrar el crédito podrás consultar su tabla de amortización completa.
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>

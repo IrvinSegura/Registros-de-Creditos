@@ -1,9 +1,23 @@
 """REST endpoints for credits. Translates HTTP to service calls and nothing else."""
 
+from datetime import date
+
+from flask import Response
 from flask.views import MethodView
 from flask_smorest import Blueprint
 
-from app.schemas import CreditPageSchema, CreditQuerySchema, CreditSchema, CreditSummarySchema
+from app.schemas import (
+    AmortizationSchema,
+    CreditChangeSchema,
+    CreditExportQuerySchema,
+    CreditPageSchema,
+    CreditQuerySchema,
+    CreditSchema,
+    CreditSummarySchema,
+    DateRangeSchema,
+    QuoteQuerySchema,
+    QuoteSchema,
+)
 from app.services import credit_service
 
 blp = Blueprint("credits", __name__, url_prefix="/api/v1/credits", description="Credit registration and lookup.")
@@ -14,7 +28,7 @@ class CreditsResource(MethodView):
     @blp.arguments(CreditQuerySchema, location="query")
     @blp.response(200, CreditPageSchema)
     def get(self, filters):
-        """List credits, paginated and optionally filtered by client name."""
+        """List credits, paginated, sorted and optionally filtered."""
         page = credit_service.list_credits(**filters)
         return {
             "items": page.items,
@@ -28,12 +42,36 @@ class CreditsResource(MethodView):
         return credit_service.create_credit(data)
 
 
+@blp.route("/export")
+class CreditExportResource(MethodView):
+    @blp.arguments(CreditExportQuerySchema, location="query")
+    @blp.response(200, content_type="text/csv", description="CSV file with the filtered credits.")
+    def get(self, filters):
+        """Download the filtered credits as a CSV file."""
+        filename = f"creditos-{date.today().isoformat()}.csv"
+        return Response(
+            credit_service.export_csv(**filters),
+            mimetype="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+
 @blp.route("/summary")
 class CreditSummaryResource(MethodView):
+    @blp.arguments(DateRangeSchema, location="query")
     @blp.response(200, CreditSummarySchema)
-    def get(self):
-        """Portfolio totals and breakdowns for the dashboard."""
-        return credit_service.get_summary()
+    def get(self, period):
+        """Portfolio totals and breakdowns for the dashboard, optionally for an issue-date period."""
+        return credit_service.get_summary(**period)
+
+
+@blp.route("/quote")
+class CreditQuoteResource(MethodView):
+    @blp.arguments(QuoteQuerySchema, location="query")
+    @blp.response(200, QuoteSchema)
+    def get(self, terms):
+        """Estimate the monthly payment of a credit before registering it."""
+        return credit_service.get_quote(**terms)
 
 
 @blp.route("/<int:credit_id>")
@@ -54,5 +92,23 @@ class CreditResource(MethodView):
     @blp.response(204)
     @blp.alt_response(404, response="NOT_FOUND")
     def delete(self, credit_id):
-        """Delete a credit."""
+        """Delete a credit and its history."""
         credit_service.delete_credit(credit_id)
+
+
+@blp.route("/<int:credit_id>/amortization")
+class CreditAmortizationResource(MethodView):
+    @blp.response(200, AmortizationSchema)
+    @blp.alt_response(404, response="NOT_FOUND")
+    def get(self, credit_id):
+        """Monthly payment schedule of a credit (fixed installments)."""
+        return credit_service.get_amortization(credit_id)
+
+
+@blp.route("/<int:credit_id>/history")
+class CreditHistoryResource(MethodView):
+    @blp.response(200, CreditChangeSchema(many=True))
+    @blp.alt_response(404, response="NOT_FOUND")
+    def get(self, credit_id):
+        """Changes made to a credit, newest first."""
+        return credit_service.get_history(credit_id)

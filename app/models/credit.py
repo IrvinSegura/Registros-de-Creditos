@@ -1,10 +1,14 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, DateTime, Numeric, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+
+if TYPE_CHECKING:
+    from app.models.credit_change import CreditChange
 
 
 class Credit(db.Model):
@@ -21,6 +25,9 @@ class Credit(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    # The ORM deletes the history itself: SQLite ignores ON DELETE CASCADE unless foreign keys are enabled
+    changes: Mapped[list["CreditChange"]] = relationship(back_populates="credit", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Credit id={self.id} client_name={self.client_name!r} amount={self.amount}>"
