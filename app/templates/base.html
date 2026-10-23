@@ -27,7 +27,10 @@
           integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet"
           integrity="sha384-9zhnRArCpusIVIudEVdI3QmXKH9nCjEGc2rNvdcQ1utx3a3zbLtW3rBOeJ2PvupL" crossorigin="anonymous">
-    <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+    {# Shared styles first, then one stylesheet per view and component (same layout as templates/ and js/) #}
+    {% for stylesheet in ["base", "views/dashboard", "views/credits", "views/register", "components/credit-detail"] %}
+    <link href="{{ url_for('static', filename='css/' ~ stylesheet ~ '.css') }}" rel="stylesheet">
+    {% endfor %}
 </head>
 
 <body>
