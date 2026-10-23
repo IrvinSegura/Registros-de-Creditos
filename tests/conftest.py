@@ -33,6 +33,8 @@ def app():
         yield app
         db.session.remove()
         db.drop_all()
+        # Closes the in-memory database, which would otherwise stay open until garbage collection
+        db.engine.dispose()
 
 
 @pytest.fixture
