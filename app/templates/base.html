@@ -25,87 +25,14 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"
           integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet"
-          integrity="sha384-9zhnRArCpusIVIudEVdI3QmXKH9nCjEGc2rNvdcQ1utx3a3zbLtW3rBOeJ2PvupL" crossorigin="anonymous">
-    {# Shared styles first, then one stylesheet per view and component (same layout as templates/ and js/) #}
-    {% for stylesheet in ["base", "views/dashboard", "views/credits", "views/register", "components/credit-detail"] %}
-    <link href="{{ url_for('static', filename='css/' ~ stylesheet ~ '.css') }}" rel="stylesheet">
-    {% endfor %}
+    {# Design tokens and shared pieces; each page adds its own stylesheets below #}
+    <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
+    {% block head %}{% endblock %}
 </head>
 
-<body>
-    <div class="app-shell">
-        <aside class="app-sidebar offcanvas-lg offcanvas-start" id="app-sidebar" tabindex="-1" aria-label="Menú principal">
-            <div class="sidebar-inner">
-                <div class="sidebar-header">
-                    <a class="brand" href="#/panel">
-                        <span class="brand-mark" aria-hidden="true"><i class="bi bi-bank2"></i></span>
-                        <span class="brand-text">
-                            <span class="brand-name">Registro de Créditos</span>
-                            <span class="brand-tagline">Gestión de cartera</span>
-                        </span>
-                    </a>
-                    <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas"
-                            data-bs-target="#app-sidebar" aria-label="Cerrar menú"></button>
-                </div>
-
-                <nav class="sidebar-nav">
-                    <p class="sidebar-section">General</p>
-                    <a class="sidebar-link" href="#/panel" data-view-link="dashboard">
-                        <i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Panel</span>
-                    </a>
-                    <a class="sidebar-link" href="#/creditos" data-view-link="credits">
-                        <i class="bi bi-wallet2" aria-hidden="true"></i><span>Créditos</span>
-                    </a>
-                    <a class="sidebar-link" href="#/nuevo" data-view-link="register">
-                        <i class="bi bi-plus-square" aria-hidden="true"></i><span>Nuevo crédito</span>
-                    </a>
-
-                    <p class="sidebar-section">Recursos</p>
-                    <a class="sidebar-link" href="/api/docs" target="_blank" rel="noopener">
-                        <i class="bi bi-code-slash" aria-hidden="true"></i><span>Documentación API</span>
-                        <i class="bi bi-box-arrow-up-right sidebar-link-end" aria-hidden="true"></i>
-                    </a>
-                </nav>
-
-                <div class="sidebar-footer">
-                    <button type="button" id="theme-toggle" class="sidebar-link">
-                        <i class="bi bi-moon-stars" aria-hidden="true"></i><span>Tema oscuro</span>
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <div class="app-main">
-            <header class="app-topbar">
-                <button type="button" class="btn btn-icon d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#app-sidebar"
-                        aria-controls="app-sidebar" aria-label="Abrir menú">
-                    <i class="bi bi-list" aria-hidden="true"></i>
-                </button>
-                <div class="topbar-title">
-                    <p class="topbar-eyebrow" id="view-eyebrow"></p>
-                    <h1 class="h4 mb-0" id="view-title" tabindex="-1"></h1>
-                </div>
-                <a href="#/nuevo" class="btn btn-primary ms-auto" id="topbar-new">
-                    <i class="bi bi-plus-lg" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">Nuevo crédito</span>
-                </a>
-            </header>
-
-            <main class="app-content">
-                {% block content %}{% endblock %}
-            </main>
-        </div>
-    </div>
-
-    {% block overlays %}{% endblock %}
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.js"
-            integrity="sha384-ueC9FHE/gdG6Xjlev9kT8QDLO/Yskgm0nfhNXN+N1odFWNO4nxt2I0gz5PsbkJs2" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"
-            integrity="sha384-Sse/HDqcypGpyTDpvZOJNnG0TT3feGQUkF9H+mnRvic+LjR+K1NhTt8f51KIQ3v3" crossorigin="anonymous"></script>
-    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+<body{% block body_attributes %}{% endblock %}>
+    {% block body %}{% endblock %}
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

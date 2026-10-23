@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión · Registro de Créditos{% endblock %}
+
+{% block head %}
+    <link href="{{ url_for('static', filename='css/views/login.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<main class="login-page">
+    <section class="login-showcase" aria-hidden="true">
+        <div class="brand">
+            <span class="brand-mark"><i class="bi bi-bank2"></i></span>
+            <span class="brand-text">
+                <span class="brand-name">Registro de Créditos</span>
+                <span class="brand-tagline">Gestión de cartera</span>
+            </span>
+        </div>
+        <div class="login-showcase-copy">
+            <h2>Tu cartera de créditos, clara y bajo control.</h2>
+            <ul class="login-features">
+                <li><i class="bi bi-graph-up-arrow"></i> Indicadores de la cartera por periodo</li>
+                <li><i class="bi bi-calendar2-week"></i> Tabla de amortización de cada crédito</li>
+                <li><i class="bi bi-clock-history"></i> Historial de cambios con su autor</li>
+            </ul>
+        </div>
+        <p class="login-showcase-footer">Acceso exclusivo para personal autorizado.</p>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-card">
+            <div class="brand login-card-brand">
+                <span class="brand-mark" aria-hidden="true"><i class="bi bi-bank2"></i></span>
+                <span class="brand-name">Registro de Créditos</span>
+            </div>
+
+            <h1 class="h3 mb-1">Inicia sesión</h1>
+            <p class="text-body-secondary mb-4">Ingresa con tu usuario y contraseña.</p>
+
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} login-alert" role="alert">
+                <i class="bi {{ 'bi-check-circle' if category == 'success' else 'bi-exclamation-triangle' }}" aria-hidden="true"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% if error %}
+            <div class="alert alert-danger login-alert" role="alert">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            {# No action attribute: the form posts to this same URL, keeping the ?next= destination #}
+            <form method="post" id="login-form" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ username }}"
+                               autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="50" required
+                               {{ "autofocus" if not username }}>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock" aria-hidden="true"></i></span>
+                        <input type="password" class="form-control" id="password" name="password"
+                               autocomplete="current-password" required {{ "autofocus" if username }}>
+                        <button type="button" class="btn btn-outline-secondary password-toggle" id="password-toggle"
+                                aria-label="Mostrar contraseña" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 login-submit">
+                    <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Iniciar sesión
+                </button>
+            </form>
+
+            <p class="login-help">¿No tienes cuenta o olvidaste tu contraseña? Pide ayuda a un administrador.</p>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}
