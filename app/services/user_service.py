@@ -48,6 +48,10 @@ def get_user(user_id: int) -> User | None:
     return db.session.get(User, user_id)
 
 
+def find_by_session_token(token: str) -> User | None:
+    return db.session.scalar(db.select(User).where(User.session_token == token))
+
+
 def find_user(username: str) -> User | None:
     return db.session.scalar(db.select(User).where(User.username == normalize_username(username)))
 
@@ -79,9 +83,10 @@ def set_password(username: str, password: str) -> User:
     user = _require_user(username)
     _check_password(password)
     user.password_hash = generate_password_hash(password)
-    # A new password also lifts any lock
+    # A new password also lifts any lock and signs the account out everywhere
     user.failed_logins = 0
     user.locked_until = None
+    user.end_sessions()
     db.session.commit()
     return user
 
@@ -89,6 +94,16 @@ def set_password(username: str, password: str) -> User:
 def set_active(username: str, active: bool) -> User:
     user = _require_user(username)
     user.is_active = active
+    if not active:
+        user.end_sessions()
+    db.session.commit()
+    return user
+
+
+def end_sessions(username: str) -> User:
+    """Signs the user out of every browser without changing the password."""
+    user = _require_user(username)
+    user.end_sessions()
     db.session.commit()
     return user
 

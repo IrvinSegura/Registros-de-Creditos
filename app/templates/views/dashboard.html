@@ -43,6 +43,17 @@
     </div>
 </div>
 
+<div class="dashboard-alert mb-3" id="dashboard-error" role="alert" hidden>
+    <span class="dashboard-alert-icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+    <div class="dashboard-alert-body">
+        <p class="dashboard-alert-title">No se pudo actualizar el panel</p>
+        <p class="dashboard-alert-text" id="dashboard-error-text"></p>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="dashboard-retry">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Reintentar
+    </button>
+</div>
+
 <div class="row g-3 mb-3">
     <div class="col-12 col-sm-6 col-xxl-3">
         <div class="card app-card kpi-card h-100">

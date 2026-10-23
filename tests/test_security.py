@@ -1,5 +1,8 @@
 import re
 
+from app import create_app
+from app.config import DevelopmentConfig
+
 
 def test_pages_send_security_headers(client):
     response = client.get("/")
@@ -33,3 +36,24 @@ def test_api_docs_get_their_own_policy(client):
     policy = client.get("/api/docs").headers["Content-Security-Policy"]
 
     assert "'unsafe-inline'" in policy
+
+
+def test_pages_and_api_answers_are_never_stored(client):
+    assert client.get("/").headers["Cache-Control"] == "no-store"
+    assert client.get("/api/v1/credits").headers["Cache-Control"] == "no-store"
+    assert client.get("/login").headers["Cache-Control"] == "no-store"
+
+
+def test_static_files_are_revalidated_instead_of_stored(client):
+    response = client.get("/static/css/base.css")
+
+    assert response.headers["Cache-Control"] == "no-cache"
+    assert response.headers["ETag"]
+
+
+def test_development_reloads_edited_templates():
+    app = create_app(DevelopmentConfig)
+    # What `flask run` does when --debug is not given
+    app.debug = False
+
+    assert app.jinja_env.auto_reload is True

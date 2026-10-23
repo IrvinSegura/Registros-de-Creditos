@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -5,6 +6,10 @@ from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.extensions import db
+
+
+def new_session_token() -> str:
+    return secrets.token_urlsafe(32)
 
 
 class User(UserMixin, db.Model):
@@ -23,6 +28,15 @@ class User(UserMixin, db.Model):
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Identifies the user inside the session cookie instead of the id; replacing it ends every open session
+    session_token: Mapped[str] = mapped_column(String(64), unique=True, default=new_session_token)
+
+    def get_id(self) -> str:
+        # Flask-Login stores this value in the session and passes it back to the user loader
+        return self.session_token
+
+    def end_sessions(self) -> None:
+        self.session_token = new_session_token()
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username={self.username!r} role={self.role!r}>"

@@ -1,6 +1,6 @@
 import { createPeriodPicker } from "../components/period-picker.js";
 import { renderPortfolioCharts, resizePortfolioCharts } from "../components/portfolio-charts.js";
-import { creditsApi } from "../lib/api.js";
+import { creditsApi, userMessage } from "../lib/api.js";
 import { onCreditsChanged } from "../lib/events.js";
 import {
     formatCurrency, formatDate, formatDayMonth, formatInteger, formatMonths, formatPercent, todayIso,
@@ -9,11 +9,14 @@ import { VIEW_SHOWN } from "../lib/router.js";
 
 let summary = null;
 let period = {};
+let requestId = 0;
 let openCredit = () => {};
 
 export function initDashboard({ onView } = {}) {
     if (onView) openCredit = onView;
     createPeriodPicker({ onChange: setPeriod });
+
+    document.getElementById("dashboard-retry").addEventListener("click", loadSummary);
 
     document.getElementById("upcoming-payments").addEventListener("click", event => {
         const button = event.target.closest("button[data-id]");
@@ -37,13 +40,30 @@ function setPeriod(range) {
 }
 
 async function loadSummary() {
+    // A slower answer for an older period must not overwrite a newer one
+    const current = ++requestId;
+    const retry = document.getElementById("dashboard-retry");
+    retry.disabled = true;
     try {
-        summary = await creditsApi.summary(period);
+        const data = await creditsApi.summary(period);
+        if (current !== requestId) return;
+        summary = data;
+        showError(null);
         render(summary);
     } catch (error) {
-        // The dashboard is secondary; keep the last data instead of interrupting the user
-        console.error("Could not load the credit summary", error);
+        if (current !== requestId) return;
+        // Keep the last figures on screen, but say they could not be refreshed
+        showError(error);
+    } finally {
+        if (current === requestId) retry.disabled = false;
     }
+}
+
+function showError(error) {
+    document.getElementById("dashboard-error").hidden = !error;
+    if (!error) return;
+    const kept = summary ? " Se muestran los últimos datos cargados." : "";
+    setText("dashboard-error-text", `${userMessage(error)}${kept}`);
 }
 
 function render(data) {

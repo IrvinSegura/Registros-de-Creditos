@@ -142,6 +142,49 @@
     color: var(--bs-body-color);
 }
 
+/* Shown when the summary cannot be loaded; the last figures stay visible below it */
+.dashboard-alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    border-radius: 0.9rem;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.dashboard-alert[hidden] {
+    display: none;
+}
+
+.dashboard-alert-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 0.6rem;
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--app-chart-4);
+}
+
+.dashboard-alert-body {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.dashboard-alert-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+.dashboard-alert-text {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+}
+
 .kpi-card .card-body {
     padding: 1.25rem 1.5rem;
 }

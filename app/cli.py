@@ -47,9 +47,17 @@ def list_users() -> None:
 @click.argument("username")
 @click.password_option("--password", prompt="Nueva contraseña", confirmation_prompt="Repite la contraseña")
 def set_password(username: str, password: str) -> None:
-    """Change an account's password (also unlocks it)."""
+    """Change an account's password; also unlocks it and ends its open sessions."""
     user = _run(lambda: user_service.set_password(username, password))
-    click.echo(f"Contraseña de '{user.username}' actualizada.")
+    click.echo(f"Contraseña de '{user.username}' actualizada. Sus sesiones abiertas se cerraron.")
+
+
+@users_cli.command("end-sessions")
+@click.argument("username")
+def end_sessions(username: str) -> None:
+    """Sign an account out of every browser without changing its password."""
+    user = _run(lambda: user_service.end_sessions(username))
+    click.echo(f"Se cerraron todas las sesiones de '{user.username}'.")
 
 
 @users_cli.command("deactivate")
