@@ -1,0 +1,34 @@
+/* Error pages (404, 500...): a centered card with a way back home */
+.error-page {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 2rem 1.25rem;
+}
+
+.error-card {
+    width: 100%;
+    max-width: 26rem;
+    text-align: center;
+}
+
+.error-brand {
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.error-brand .brand-name {
+    color: var(--bs-body-color);
+}
+
+.error-code {
+    margin-bottom: 0.5rem;
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--app-chart-1), var(--app-chart-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
