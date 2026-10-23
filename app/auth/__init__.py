@@ -19,9 +19,10 @@ def register_auth(app: Flask) -> None:
     app.register_blueprint(auth_bp)
 
     @login_manager.user_loader
-    def load_user(user_id: str):
-        user = user_service.get_user(int(user_id))
-        # A deactivated account loses its open sessions on the next request
+    def load_user(session_token: str):
+        # Sessions hold the user's session token (see User.get_id); once it is replaced, or the
+        # account is deactivated, the session no longer finds its user and has to sign in again
+        user = user_service.find_by_session_token(session_token)
         return user if user and user.is_active else None
 
     @app.before_request

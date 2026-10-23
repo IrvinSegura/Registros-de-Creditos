@@ -148,6 +148,42 @@ def test_deactivated_users_lose_their_open_session(client):
     assert client.get(URL).status_code == 401
 
 
+def test_changing_the_password_ends_open_sessions(client):
+    user_service.set_password("admin", "another-secret-1")
+
+    assert client.get(URL).status_code == 401
+
+
+def test_password_change_only_signs_out_that_user(client_as):
+    admin = client_as("admin")
+    viewer = client_as("viewer")
+
+    user_service.set_password("viewer", "another-secret-1")
+
+    assert admin.get(URL).status_code == 200
+    assert viewer.get(URL).status_code == 401
+
+
+def test_end_sessions_command_signs_the_user_out(app, client):
+    result = app.test_cli_runner().invoke(users_cli, ["end-sessions", "admin"])
+
+    assert result.exit_code == 0, result.output
+    assert "Se cerraron todas las sesiones de 'admin'." in result.output
+    assert client.get(URL).status_code == 401
+    assert sign_in(app.test_client(), "admin").status_code == 302
+
+
+def test_sessions_that_hold_the_user_id_are_rejected(app, make_user):
+    # Sessions opened before the session tokens existed stored the numeric id
+    user = make_user()
+    client = app.test_client()
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user.id)
+        session["_fresh"] = True
+
+    assert client.get(URL).status_code == 401
+
+
 # ---------- CSRF ----------
 
 def test_api_rejects_writes_without_the_csrf_token(client, valid_credit):
