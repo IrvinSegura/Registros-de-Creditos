@@ -9,14 +9,34 @@
                 </div>
             </div>
             <div class="toolbar-actions">
+                <label for="status-filter" class="visually-hidden">Estado</label>
+                <select class="form-select status-filter" id="status-filter">
+                    <option value="">Todos</option>
+                    <option value="active">Vigentes</option>
+                    <option value="overdue">Atrasados</option>
+                    <option value="completed">Concluidos</option>
+                    <option value="archived">Archivados</option>
+                </select>
                 <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#credit-filters"
                         aria-expanded="false" aria-controls="credit-filters" id="filters-toggle">
                     <i class="bi bi-funnel" aria-hidden="true"></i> Filtros
                     <span class="badge rounded-pill bg-primary ms-1" id="filters-count" hidden></span>
                 </button>
-                <a class="btn btn-outline-secondary" id="export-csv" href="/api/v1/credits/export" download>
-                    <i class="bi bi-download" aria-hidden="true"></i> Exportar CSV
-                </a>
+                <div class="dropdown">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false" id="export-toggle">
+                        <i class="bi bi-download" aria-hidden="true"></i> Exportar
+                    </button>
+                    {# The script points each link at the current search, filters and order #}
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="export-toggle">
+                        <li><a class="dropdown-item" data-export="xlsx" href="/api/v1/credits/export?format=xlsx" download>
+                            <i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Excel</a></li>
+                        <li><a class="dropdown-item" data-export="pdf" href="/api/v1/credits/export?format=pdf" download>
+                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF</a></li>
+                        <li><a class="dropdown-item" data-export="csv" href="/api/v1/credits/export?format=csv" download>
+                            <i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -57,12 +77,12 @@
                     <th scope="col" class="text-end" aria-sort="none"><button type="button" class="sort-btn" data-sort="amount">Monto</button></th>
                     <th scope="col" class="text-end" aria-sort="none"><button type="button" class="sort-btn" data-sort="interest_rate">Tasa anual</button></th>
                     <th scope="col" aria-sort="none"><button type="button" class="sort-btn" data-sort="term_months">Plazo</button></th>
-                    <th scope="col" class="text-end" title="Saldo pendiente según el calendario de pagos">Saldo</th>
+                    <th scope="col" class="text-end" title="Capital pendiente después de los pagos registrados">Saldo</th>
                     <th scope="col" aria-sort="none"><button type="button" class="sort-btn" data-sort="issue_date">Otorgado</button></th>
                     <th scope="col" class="text-end"><span class="visually-hidden">Acciones</span></th>
                 </tr>
             </thead>
-            <tbody id="credits-body" aria-live="polite"></tbody>
+            <tbody id="credits-body"></tbody>
         </table>
     </div>
 
@@ -77,8 +97,22 @@
         {% endif %}
     </div>
 
+    {# Screen readers hear only the result count after a search or filter, not every row again #}
+    <p class="visually-hidden" id="credits-status" role="status"></p>
+
     <div class="card-footer app-card-footer d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
-        <span id="page-info" class="small text-body-secondary"></span>
+        <div class="d-flex align-items-center gap-3">
+            <span id="page-info" class="small text-body-secondary"></span>
+            <div class="d-flex align-items-center gap-2">
+                <label for="page-size" class="small text-body-secondary text-nowrap">Por página</label>
+                <select class="form-select form-select-sm page-size" id="page-size">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
         <div class="btn-group" role="group" aria-label="Paginación">
             <button type="button" id="prev-page" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
