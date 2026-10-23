@@ -206,3 +206,7 @@ class CreditChangeSchema(Schema):
     action = fields.String(metadata={"description": "created or updated."})
     changes = fields.Dict(metadata={"description": "{field: {old, new}} with values as strings."})
     changed_at = fields.DateTime()
+    changed_by = fields.Function(
+        lambda change: change.user.full_name if change.user else None,
+        metadata={"description": "Name of the user who made the change, or null when unknown."},
+    )

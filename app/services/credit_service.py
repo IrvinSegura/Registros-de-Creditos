@@ -8,6 +8,7 @@ from typing import Any
 
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, case, extract, func
+from sqlalchemy.orm import joinedload
 
 from app.errors import NotFoundError
 from app.extensions import db
@@ -89,16 +90,16 @@ def get_credit(credit_id: int) -> Credit:
     return credit
 
 
-def create_credit(data: dict[str, Any]) -> Credit:
+def create_credit(data: dict[str, Any], user_id: int | None = None) -> Credit:
     credit = Credit(**data)
     changes = {field: {"old": None, "new": _serialize(data[field])} for field in TRACKED_FIELDS}
-    credit.changes.append(CreditChange(action="created", changes=changes))
+    credit.changes.append(CreditChange(action="created", changes=changes, user_id=user_id))
     db.session.add(credit)
     db.session.commit()
     return credit
 
 
-def update_credit(credit_id: int, data: dict[str, Any]) -> Credit:
+def update_credit(credit_id: int, data: dict[str, Any], user_id: int | None = None) -> Credit:
     credit = get_credit(credit_id)
     changes = {}
     for field, value in data.items():
@@ -108,7 +109,7 @@ def update_credit(credit_id: int, data: dict[str, Any]) -> Credit:
         setattr(credit, field, value)
     # Saving without edits leaves no history entry
     if changes:
-        credit.changes.append(CreditChange(action="updated", changes=changes))
+        credit.changes.append(CreditChange(action="updated", changes=changes, user_id=user_id))
     db.session.commit()
     return credit
 
@@ -123,6 +124,7 @@ def get_history(credit_id: int) -> list[CreditChange]:
     get_credit(credit_id)
     query = (
         db.select(CreditChange)
+        .options(joinedload(CreditChange.user))
         .where(CreditChange.credit_id == credit_id)
         .order_by(CreditChange.changed_at.desc(), CreditChange.id.desc())
     )
