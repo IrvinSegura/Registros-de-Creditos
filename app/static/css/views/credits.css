@@ -25,6 +25,15 @@
     white-space: nowrap;
 }
 
+.status-filter {
+    width: auto;
+    min-width: 9.5rem;
+}
+
+.page-size {
+    width: auto;
+}
+
 .filters-panel {
     margin-top: 1rem;
     padding: 1rem 1.25rem;
@@ -174,6 +183,26 @@ th[aria-sort="descending"] .sort-btn::after {
     background: var(--app-chart-3);
 }
 
+.term-progress.is-overdue .term-progress-bar span {
+    background: var(--app-danger);
+}
+
+.term-progress.is-archived .term-progress-bar span {
+    background: var(--bs-secondary-color);
+}
+
+.term-progress-label .status-badge {
+    margin-right: 0.15rem;
+}
+
+/* Overdue amount under the balance */
+.balance-overdue {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--app-danger);
+}
+
 .row-actions {
     display: inline-flex;
     gap: 0.35rem;
@@ -266,8 +295,18 @@ th[aria-sort="descending"] .sort-btn::after {
         width: 100%;
     }
 
-    .toolbar-actions .btn {
+    .toolbar-actions {
+        flex-wrap: wrap;
+    }
+
+    .toolbar-actions .btn,
+    .toolbar-actions .dropdown,
+    .toolbar-actions .status-filter {
         flex: 1;
+    }
+
+    .toolbar-actions .dropdown .btn {
+        width: 100%;
     }
 
     .search-box {

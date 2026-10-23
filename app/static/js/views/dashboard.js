@@ -73,15 +73,20 @@ function render(data) {
 
     setText("kpi-total-credits", formatInteger(data.total_credits));
     setText("kpi-credit-status", hasCredits
-        ? `${formatInteger(data.active_credits)} vigentes · ${formatInteger(data.completed_credits)} concluidos`
+        ? [[data.active_credits, "vigente"], [data.overdue_credits, "atrasado"], [data.completed_credits, "concluido"]]
+            .map(([count, word]) => `${formatInteger(count)} ${word}${count === 1 ? "" : "s"}`)
+            .join(" · ")
         : "");
     setText("kpi-total-amount", formatCurrency(data.total_amount));
     setText("kpi-average-amount", hasCredits ? `Promedio de ${formatCurrency(data.average_amount)} por crédito` : "");
     setText("kpi-outstanding", formatCurrency(data.outstanding_balance));
     document.getElementById("kpi-outstanding-meter").style.width = `${outstandingShare}%`;
     setText("kpi-outstanding-share", hasCredits
-        ? `${formatPercent(outstandingShare.toFixed(1))} del monto otorgado, según calendario`
+        ? `${formatPercent(outstandingShare.toFixed(1))} del monto otorgado, según los pagos registrados`
         : "");
+    const overdue = Number(data.overdue_amount) > 0;
+    document.getElementById("kpi-overdue").hidden = !overdue;
+    if (overdue) setText("kpi-overdue", `${formatCurrency(data.overdue_amount)} vencido sin pagar`);
     setText("kpi-weighted-rate", formatPercent(data.weighted_interest_rate));
     setText("kpi-rate-detail", hasCredits
         ? `Promedio simple ${formatPercent(data.average_interest_rate)} · plazo de ${formatMonths(data.average_term_months)}`
@@ -102,9 +107,10 @@ function renderUpcoming(payments) {
         const item = document.createElement("li");
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "upcoming-item";
+        button.className = `upcoming-item${payment.overdue ? " is-overdue" : ""}`;
         button.dataset.id = payment.credit_id;
-        button.setAttribute("aria-label", `Ver crédito de ${payment.client_name}, vence el ${formatDate(payment.due_date)}`);
+        const when = payment.overdue ? "vencido desde el" : "vence el";
+        button.setAttribute("aria-label", `Ver crédito de ${payment.client_name}, ${when} ${formatDate(payment.due_date)}`);
 
         const [day, monthLabel] = formatDayMonth(payment.due_date);
         const dateBox = document.createElement("span");
@@ -144,7 +150,8 @@ function daysBetween(fromIso, toIso) {
 }
 
 function dueLabel(days) {
-    if (days <= 0) return "Vence hoy";
+    if (days < 0) return days === -1 ? "Vencido hace 1 día" : `Vencido hace ${-days} días`;
+    if (days === 0) return "Vence hoy";
     if (days === 1) return "Vence mañana";
     return `Vence en ${days} días`;
 }

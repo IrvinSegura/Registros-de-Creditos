@@ -83,6 +83,7 @@
                 <p class="kpi-value" id="kpi-outstanding">—</p>
                 <div class="kpi-meter" aria-hidden="true"><span id="kpi-outstanding-meter"></span></div>
                 <p class="kpi-hint" id="kpi-outstanding-share"></p>
+                <p class="kpi-hint kpi-alert" id="kpi-overdue" hidden></p>
             </div>
         </div>
     </div>
@@ -145,14 +146,14 @@
                     <div class="card-heading">
                         <div>
                             <h2 class="h6 mb-1">Próximos vencimientos</h2>
-                            <p class="small text-body-secondary mb-0">Cuotas que vencen en los próximos 30 días.</p>
+                            <p class="small text-body-secondary mb-0">Cuotas vencidas sin pagar y las que vencen en los próximos 30 días.</p>
                         </div>
                         <i class="bi bi-calendar2-week text-primary fs-4" aria-hidden="true"></i>
                     </div>
                     <ul class="upcoming-list" id="upcoming-payments"></ul>
                     <p class="upcoming-empty" id="upcoming-empty" hidden>
                         <i class="bi bi-check2-circle" aria-hidden="true"></i>
-                        Ninguna cuota vence en los próximos 30 días.
+                        Nada vencido ni por vencer en los próximos 30 días.
                     </p>
                 </div>
             </div>

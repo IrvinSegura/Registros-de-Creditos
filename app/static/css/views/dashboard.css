@@ -225,6 +225,13 @@
 }
 
 /* Share of the granted amount still to be collected */
+/* Overdue amount under the outstanding balance */
+.kpi-alert {
+    margin-top: 0.25rem;
+    color: var(--app-danger);
+    font-weight: 600;
+}
+
 .kpi-meter {
     height: 0.35rem;
     margin-top: 0.6rem;
@@ -449,4 +456,15 @@
     .kpi-value {
         font-size: 1.4rem;
     }
+}
+
+/* Overdue installments in the upcoming list */
+.upcoming-item.is-overdue .upcoming-date {
+    background: var(--app-danger-bg);
+    color: var(--app-danger);
+}
+
+.upcoming-item.is-overdue .upcoming-due {
+    color: var(--app-danger);
+    font-weight: 600;
 }

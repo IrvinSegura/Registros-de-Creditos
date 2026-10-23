@@ -18,6 +18,8 @@
     --app-chart-3: #10b981;
     --app-chart-4: #f59e0b;
     --app-interest: #f59e0b;
+    --app-danger: #dc2626;
+    --app-danger-bg: rgba(220, 38, 38, 0.1);
     --app-sidebar-width: 264px;
 
     --bs-body-font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -48,6 +50,8 @@
     --app-chart-3: #34d399;
     --app-chart-4: #fbbf24;
     --app-interest: #fbbf24;
+    --app-danger: #f87171;
+    --app-danger-bg: rgba(248, 113, 113, 0.14);
 
     --bs-body-bg: #0e121a;
     --bs-body-color: #e5e7eb;
@@ -277,6 +281,13 @@ body {
 .sidebar-user-logout:focus-visible {
     background: rgba(239, 68, 68, 0.16);
     color: #fca5a5;
+}
+
+/* Same button shape, without the sign-out red */
+.sidebar-user-account:hover,
+.sidebar-user-account:focus-visible {
+    background: var(--app-sidebar-hover);
+    color: var(--app-sidebar-text-strong);
 }
 
 /* ---------- Top bar ---------- */
@@ -515,12 +526,24 @@ body {
     gap: 0.5rem;
 }
 
-.swal2-popup.swal2-toast {
+/* SweetAlert's stylesheet loads after this one and gives toasts their own white background, so
+   these rules need one more selector to win; otherwise dark mode shows light text on white */
+html .swal2-popup.swal2-toast {
+    background: var(--app-surface);
     border: 1px solid var(--app-border);
     box-shadow: var(--app-shadow);
 }
 
-/* Credit status: active or completed */
+html .swal2-toast .swal2-title {
+    color: var(--bs-body-color);
+}
+
+/* Icon before the text of menu items (export and statement downloads) */
+.dropdown-item > .bi {
+    margin-right: 0.35rem;
+}
+
+/* Credit status: active, overdue, completed or archived (also used for account states) */
 .status-badge {
     font-weight: 600;
     font-size: 0.7rem;
@@ -539,6 +562,17 @@ body {
 
 [data-bs-theme="dark"] .status-completed {
     color: #6ee7b7;
+}
+
+.status-overdue {
+    background: var(--app-danger-bg);
+    color: var(--app-danger);
+}
+
+.status-archived {
+    background: var(--app-surface-muted);
+    color: var(--bs-secondary-color);
+    box-shadow: inset 0 0 0 1px var(--app-border);
 }
 
 /* ---------- Small screens ---------- */

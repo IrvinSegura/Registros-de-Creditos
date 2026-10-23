@@ -1,0 +1,30 @@
+{# The table reuses the credits table styles, so it also turns into stacked rows on narrow screens #}
+<div class="card app-card credits-card">
+    <div class="card-body credits-header">
+        <div class="toolbar">
+            <p class="text-body-secondary mb-0">
+                Administradores: todo · Analistas: registrar, editar y cobrar · Consulta: solo ver y descargar.
+            </p>
+            <div class="toolbar-actions">
+                <button type="button" class="btn btn-primary" id="user-new">
+                    <i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table app-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Rol</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Último acceso</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">Acciones</span></th>
+                </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+        </table>
+    </div>
+</div>

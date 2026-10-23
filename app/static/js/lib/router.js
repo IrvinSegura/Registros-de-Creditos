@@ -3,6 +3,7 @@ const VIEWS = {
     dashboard: { hash: "#/panel", title: "Panel", eyebrow: "Resumen de la cartera" },
     credits: { hash: "#/creditos", title: "Créditos", eyebrow: "Cartera" },
     register: { hash: "#/nuevo", title: "Nuevo crédito", eyebrow: "Registro" },
+    users: { hash: "#/usuarios", title: "Usuarios", eyebrow: "Administración" },
 };
 const DEFAULT_VIEW = "dashboard";
 const APP_NAME = "Registro de Créditos";
