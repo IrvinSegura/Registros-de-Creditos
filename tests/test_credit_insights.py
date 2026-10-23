@@ -1,7 +1,10 @@
 import csv
 import io
+from datetime import date, timedelta
 
 import pytest
+
+from app.services.amortization import add_months
 
 URL = "/api/v1/credits"
 
@@ -76,8 +79,13 @@ def test_export_returns_the_filtered_credits_as_csv(client, portfolio):
     text = response.get_data(as_text=True)
     assert text.startswith("﻿")
     rows = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
-    assert rows[0] == ["ID", "Cliente", "Monto", "Tasa anual (%)", "Plazo (meses)", "Fecha de otorgamiento"]
+    assert rows[0] == [
+        "ID", "Cliente", "Monto", "Tasa anual (%)", "Plazo (meses)", "Fecha de otorgamiento",
+        "Estado", "Cuota mensual", "Cuotas transcurridas", "Saldo pendiente", "Próximo vencimiento",
+    ]
     assert [row[2] for row in rows[1:]] == ["2500.00", "1000.00"]
+    # Both were issued in early 2026 and are already finished or in progress, never pending
+    assert {row[6] for row in rows[1:]} <= {"Vigente", "Concluido"}
 
 
 def test_history_records_creation_and_real_changes_only(client, create_credit, valid_credit):
@@ -120,3 +128,40 @@ def test_summary_ranks_the_top_clients(client, portfolio):
 
     assert top[0] == {"client_name": "Bruno Diaz", "credits": 1, "total_amount": "5000.00"}
     assert top[1] == {"client_name": "Ana Paz", "credits": 2, "total_amount": "3500.00"}
+
+
+# Dates are relative to today so these tests do not depend on when they run
+
+def test_list_includes_where_each_credit_stands(client, create_credit):
+    issued = add_months(date.today(), -2)
+    create_credit(amount=10000, interest_rate=12, term_months=12, issue_date=issued.isoformat())
+
+    standing = client.get(URL).get_json()["items"][0]["standing"]
+
+    assert standing["status"] == "active"
+    assert standing["installments_elapsed"] == 2
+    assert standing["monthly_payment"] == "888.49"
+    assert standing["next_due_date"] == add_months(issued, 3).isoformat()
+    assert standing["next_payment"] == "888.49"
+
+
+def test_summary_reports_the_portfolio_standing(client, create_credit):
+    create_credit(client_name="Ana Paz", amount=1000, interest_rate=10, term_months=12,
+                  issue_date=add_months(date.today(), -13).isoformat())
+    issued = date.today() - timedelta(days=25)
+    active = create_credit(client_name="Bruno Diaz", amount=3000, interest_rate=20, term_months=12,
+                           issue_date=issued.isoformat())
+
+    body = client.get(f"{URL}/summary").get_json()
+
+    assert (body["active_credits"], body["completed_credits"]) == (1, 1)
+    assert body["outstanding_balance"] == "3000.00"
+    assert body["weighted_interest_rate"] == "17.50"
+    assert body["upcoming_payments"] == [
+        {
+            "credit_id": active["id"],
+            "client_name": "Bruno Diaz",
+            "due_date": add_months(issued, 1).isoformat(),
+            "amount": active["standing"]["monthly_payment"],
+        }
+    ]
