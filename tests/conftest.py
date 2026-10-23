@@ -21,6 +21,7 @@ def fast_password_hashing(monkeypatch):
 @pytest.fixture
 def app():
     app = create_app(TestingConfig)
+
     # The app context below stays open for the whole test, so requests share `g`; without this,
     # the user Flask-Login caches there would leak from one request (or client) into the next
     def forget_cached_user():
