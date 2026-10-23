@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{# Replaces flask-smorest's Swagger UI page (same name, found first in the app's templates) so that
+   "Try it out" sends the session's CSRF token; without it every POST, PUT and DELETE would get 403. #}
+<html lang="es">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link href="{{ swagger_ui_url }}swagger-ui.css" rel="stylesheet" type="text/css"/>
+  </head>
+
+  <body>
+
+    <div id="swagger-ui-container"></div>
+
+    <script src="{{ swagger_ui_url }}swagger-ui-standalone-preset.js"></script>
+    <script src="{{ swagger_ui_url }}swagger-ui-bundle.js"></script>
+    <script>
+      const csrfToken = {{ csrf_token() | tojson }};
+
+      const config = {
+        url: {{ spec_url | tojson }},
+        dom_id: "#swagger-ui-container",
+        requestInterceptor: request => {
+          request.headers["X-CSRF-Token"] = csrfToken;
+          return request;
+        },
+      };
+
+      const overrideConfig = {{ swagger_ui_config | tojson }};
+      Object.assign(config, overrideConfig);
+
+      window.onload = () => {
+        window.ui = SwaggerUIBundle(config);
+      };
+    </script>
+
+  </body>
+
+</html>

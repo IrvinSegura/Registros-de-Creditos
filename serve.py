@@ -4,13 +4,16 @@ Run it with `python serve.py` after setting APP_ENV=production and SECRET_KEY (s
 In production the session cookie is HTTPS-only, so the app is meant to sit behind a reverse proxy
 that terminates TLS (IIS, nginx, Caddy...); TRUSTED_PROXY tells Waitress to trust that proxy's
 X-Forwarded-* headers, so the app sees the original client address and the https scheme.
+It also copies the SQLite database at start-up and every BACKUP_INTERVAL_HOURS (see .env.example).
 """
 
 import os
 
 from waitress import serve
 
-from wsgi import app  # also loads .env
+from wsgi import app  # also loads .env, so it must be imported before anything else from app/
+
+from app.services.backup_service import schedule_backups  # noqa: E402  isort:skip
 
 
 def main() -> None:
@@ -27,6 +30,7 @@ def main() -> None:
             trusted_proxy_headers={"x-forwarded-for", "x-forwarded-proto", "x-forwarded-host"},
             clear_untrusted_proxy_headers=True,
         )
+    schedule_backups(app)
     serve(app, **options)
 
 

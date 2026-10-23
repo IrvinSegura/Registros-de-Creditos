@@ -3,7 +3,11 @@
 export const PERMISSIONS = {
     create: "credits:create",
     update: "credits:update",
+    archive: "credits:archive",
     delete: "credits:delete",
+    recordPayments: "payments:create",
+    deletePayments: "payments:delete",
+    manageUsers: "users:manage",
 };
 
 const granted = new Set((document.body.dataset.permissions ?? "").split(" ").filter(Boolean));

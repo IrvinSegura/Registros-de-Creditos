@@ -5,7 +5,7 @@ from flask_login import current_user, login_user, logout_user
 
 from app.security import rotate_csrf_token
 from app.services import user_service
-from app.services.user_service import AccountLockedError, InvalidCredentialsError
+from app.services.user_service import AccountLockedError, InvalidCredentialsError, TooManyAttemptsError
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -19,8 +19,10 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         try:
-            user = user_service.authenticate(username, request.form.get("password", ""))
-        except (InvalidCredentialsError, AccountLockedError) as failure:
+            # Behind a trusted proxy, Waitress already puts the client's address here (see serve.py)
+            client_ip = request.remote_addr or "unknown"
+            user = user_service.authenticate(username, request.form.get("password", ""), client_ip)
+        except (InvalidCredentialsError, AccountLockedError, TooManyAttemptsError) as failure:
             error, status = failure.message, failure.status.value
         else:
             login_user(user)

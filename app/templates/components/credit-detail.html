@@ -14,6 +14,15 @@
     </div>
 
     <div class="offcanvas-body">
+        <div class="detail-notice detail-notice-muted" id="detail-archived" hidden>
+            <i class="bi bi-archive" aria-hidden="true"></i>
+            <span>Este crédito está archivado: no cuenta en la cartera y no se puede editar ni registrarle pagos.</span>
+        </div>
+        <div class="detail-notice detail-notice-danger" id="detail-overdue" role="status" hidden>
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            <span id="detail-overdue-text"></span>
+        </div>
+
         <div class="detail-stats">
             <div><span>Monto</span><strong id="detail-amount">—</strong></div>
             <div><span>Tasa anual</span><strong id="detail-rate">—</strong></div>
@@ -25,7 +34,7 @@
 
         <section class="detail-progress" aria-labelledby="detail-progress-title">
             <div class="detail-progress-header">
-                <h3 class="detail-progress-title" id="detail-progress-title">Avance del crédito</h3>
+                <h3 class="detail-progress-title" id="detail-progress-title">Avance de pagos</h3>
                 <span id="detail-progress-label"></span>
             </div>
             <div class="detail-progress-bar" role="progressbar" id="detail-progress-bar" aria-valuemin="0"
@@ -33,16 +42,24 @@
                 <span id="detail-progress-fill"></span>
             </div>
             <dl class="detail-progress-facts">
-                <div><dt>Saldo pendiente</dt><dd id="detail-outstanding">—</dd></div>
-                <div><dt>Próximo vencimiento</dt><dd id="detail-next">—</dd></div>
+                <div><dt>Pagado</dt><dd id="detail-paid">—</dd></div>
+                <div><dt>Por pagar (con intereses)</dt><dd id="detail-remaining">—</dd></div>
+                <div><dt>Saldo de capital</dt><dd id="detail-outstanding">—</dd></div>
+                <div><dt>Próximo pago</dt><dd id="detail-next">—</dd></div>
             </dl>
-            <p class="detail-progress-note">Calculado según el calendario de pagos, suponiendo cuotas pagadas a tiempo.</p>
+            <p class="detail-progress-note">Calculado con los pagos registrados; cada pago cubre las cuotas en orden.</p>
         </section>
 
         <ul class="nav nav-underline detail-tabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="detail-schedule-tab" data-bs-toggle="tab" data-bs-target="#detail-schedule"
                         type="button" role="tab" aria-controls="detail-schedule" aria-selected="true">Amortización</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="detail-payments-tab" data-bs-toggle="tab" data-bs-target="#detail-payments"
+                        type="button" role="tab" aria-controls="detail-payments" aria-selected="false">
+                    Pagos <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis" id="detail-payments-count"></span>
+                </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="detail-history-tab" data-bs-toggle="tab" data-bs-target="#detail-history"
@@ -64,11 +81,50 @@
                                 <th scope="col" class="text-end">Interés</th>
                                 <th scope="col" class="text-end">Capital</th>
                                 <th scope="col" class="text-end">Saldo</th>
+                                <th scope="col">Estado</th>
                             </tr>
                         </thead>
                         <tbody id="detail-schedule-body"></tbody>
                     </table>
                 </div>
+            </div>
+            <div class="tab-pane fade" id="detail-payments" role="tabpanel" aria-labelledby="detail-payments-tab" tabindex="0">
+                {% if can("payments:create") %}
+                <form class="payment-form" id="payment-form" novalidate hidden>
+                    <p class="payment-form-title">Registrar pago</p>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label for="payment-amount" class="form-label">Monto</label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text">$</span>
+                                <input type="number" id="payment-amount" name="amount" class="form-control" step="0.01" min="0.01"
+                                       inputmode="decimal" required aria-describedby="payment-amount-error payment-amount-hint">
+                                <div class="invalid-feedback" id="payment-amount-error"></div>
+                            </div>
+                            <p class="form-text mb-0" id="payment-amount-hint"></p>
+                        </div>
+                        <div class="col-6">
+                            <label for="payment-paid_on" class="form-label">Fecha de pago</label>
+                            <input type="date" id="payment-paid_on" name="paid_on" class="form-control" required
+                                   aria-describedby="payment-paid_on-error">
+                            <div class="invalid-feedback" id="payment-paid_on-error"></div>
+                        </div>
+                        <div class="col-12">
+                            <label for="payment-note" class="form-label">Nota <span class="text-body-secondary">(opcional)</span></label>
+                            <input type="text" id="payment-note" name="note" class="form-control" maxlength="200"
+                                   placeholder="Ej. transferencia 4821 o recibo 102" autocomplete="off" aria-describedby="payment-note-error">
+                            <div class="invalid-feedback" id="payment-note-error"></div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-cash-coin" aria-hidden="true"></i> Registrar pago
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+                <ul class="payment-list" id="detail-payments-list"></ul>
+                <p class="text-body-secondary small" id="detail-payments-empty" hidden>Este crédito no tiene pagos registrados.</p>
             </div>
             <div class="tab-pane fade" id="detail-history" role="tabpanel" aria-labelledby="detail-history-tab" tabindex="0">
                 <ol class="timeline" id="detail-history-list"></ol>
@@ -79,18 +135,38 @@
         </div>
     </div>
 
-    {% if can("credits:update") or can("credits:delete") %}
     <div class="credit-detail-footer">
-        {% if can("credits:delete") %}
-        <button type="button" class="btn btn-outline-danger" id="detail-delete">
-            <i class="bi bi-trash3" aria-hidden="true"></i> Eliminar
-        </button>
-        {% endif %}
-        {% if can("credits:update") %}
-        <button type="button" class="btn btn-primary ms-auto" id="detail-edit">
-            <i class="bi bi-pencil" aria-hidden="true"></i> Editar
-        </button>
-        {% endif %}
+        <div class="dropdown dropup">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                    id="detail-statement-toggle">
+                <i class="bi bi-file-earmark-text" aria-hidden="true"></i> Estado de cuenta
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="detail-statement-toggle">
+                <li><a class="dropdown-item" data-statement="pdf" href="#" download>
+                    <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF</a></li>
+                <li><a class="dropdown-item" data-statement="xlsx" href="#" download>
+                    <i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Excel</a></li>
+            </ul>
+        </div>
+        <div class="d-flex gap-2 ms-auto">
+            {% if can("credits:archive") %}
+            <button type="button" class="btn btn-outline-secondary" id="detail-archive">
+                <i class="bi bi-archive" aria-hidden="true"></i> Archivar
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="detail-restore" hidden>
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Restaurar
+            </button>
+            {% endif %}
+            {% if can("credits:delete") %}
+            <button type="button" class="btn btn-outline-danger" id="detail-delete" hidden>
+                <i class="bi bi-trash3" aria-hidden="true"></i> Eliminar
+            </button>
+            {% endif %}
+            {% if can("credits:update") %}
+            <button type="button" class="btn btn-primary" id="detail-edit">
+                <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+            </button>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
 </div>

@@ -12,15 +12,26 @@ from app.errors import DomainError
 VIEW_CREDITS = "credits:view"
 CREATE_CREDITS = "credits:create"
 UPDATE_CREDITS = "credits:update"
+# Archiving takes a credit out of the portfolio; deleting removes an archived one for good
+ARCHIVE_CREDITS = "credits:archive"
 DELETE_CREDITS = "credits:delete"
+RECORD_PAYMENTS = "payments:create"
+# Undoing a payment changes balances already reported, so it stays with administrators
+DELETE_PAYMENTS = "payments:delete"
+MANAGE_USERS = "users:manage"
 
 ADMIN = "admin"
 ANALYST = "analyst"
 VIEWER = "viewer"
 
 ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
-    ADMIN: frozenset({VIEW_CREDITS, CREATE_CREDITS, UPDATE_CREDITS, DELETE_CREDITS}),
-    ANALYST: frozenset({VIEW_CREDITS, CREATE_CREDITS, UPDATE_CREDITS}),
+    ADMIN: frozenset(
+        {
+            VIEW_CREDITS, CREATE_CREDITS, UPDATE_CREDITS, ARCHIVE_CREDITS, DELETE_CREDITS,
+            RECORD_PAYMENTS, DELETE_PAYMENTS, MANAGE_USERS,
+        }
+    ),
+    ANALYST: frozenset({VIEW_CREDITS, CREATE_CREDITS, UPDATE_CREDITS, RECORD_PAYMENTS}),
     VIEWER: frozenset({VIEW_CREDITS}),
 }
 ROLES = tuple(ROLE_PERMISSIONS)

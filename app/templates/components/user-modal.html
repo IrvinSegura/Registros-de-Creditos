@@ -1,0 +1,61 @@
+{# Create and edit accounts; the script shows the fields that apply to each case #}
+<div class="modal fade" id="user-modal" tabindex="-1" aria-labelledby="user-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content app-modal" id="user-form" novalidate data-native-validation>
+            <div class="modal-header">
+                <div class="section-heading">
+                    <span class="section-icon" aria-hidden="true"><i class="bi bi-person-gear"></i></span>
+                    <h2 class="modal-title h5 mb-0" id="user-modal-title">Nuevo usuario</h2>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12" data-only="create">
+                        <label for="user-username" class="form-label">Usuario</label>
+                        <input type="text" id="user-username" name="username" class="form-control" required minlength="3" maxlength="50"
+                               pattern="[a-z0-9._\-]+" autocomplete="off" aria-describedby="user-username-error user-username-hint">
+                        <div class="invalid-feedback" id="user-username-error"></div>
+                        <p class="form-text mb-0" id="user-username-hint">Minúsculas, números, punto, guion o guion bajo. No se puede cambiar después.</p>
+                    </div>
+                    <div class="col-12">
+                        <label for="user-full_name" class="form-label">Nombre completo</label>
+                        <input type="text" id="user-full_name" name="full_name" class="form-control" required minlength="3" maxlength="100"
+                               autocomplete="off" aria-describedby="user-full_name-error">
+                        <div class="invalid-feedback" id="user-full_name-error"></div>
+                    </div>
+                    <div class="col-12">
+                        <label for="user-role" class="form-label">Rol</label>
+                        <select id="user-role" name="role" class="form-select" required aria-describedby="user-role-error">
+                            <option value="viewer">Consulta: solo ver y descargar</option>
+                            <option value="analyst">Analista: registrar, editar y cobrar</option>
+                            <option value="admin">Administrador: todo, incluidos los usuarios</option>
+                        </select>
+                        <div class="invalid-feedback" id="user-role-error"></div>
+                    </div>
+                    <div class="col-12" data-only="create">
+                        <label for="user-password" class="form-label">Contraseña inicial</label>
+                        <input type="password" id="user-password" name="password" class="form-control" required minlength="10"
+                               autocomplete="new-password" aria-describedby="user-password-error">
+                        <div class="invalid-feedback" id="user-password-error"></div>
+                    </div>
+                    <div class="col-12" data-only="edit">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="user-is_active" name="is_active"
+                                   aria-describedby="user-is_active-error">
+                            <label class="form-check-label" for="user-is_active">Puede iniciar sesión</label>
+                            <div class="invalid-feedback" id="user-is_active-error"></div>
+                        </div>
+                        <p class="form-text mb-0">Al desactivarla, la cuenta sale de todas sus sesiones abiertas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save" aria-hidden="true"></i> Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

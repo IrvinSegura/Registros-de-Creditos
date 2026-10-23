@@ -1,4 +1,15 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-ra"
+# Browser tests are slow and need Chromium and internet access: run them with `pytest -m e2e`
+addopts = "-ra -m 'not e2e'"
+markers = ["e2e: browser tests with Playwright (tests/e2e)"]
+
+# pytest --cov: what the unit tests cover inside app/
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90

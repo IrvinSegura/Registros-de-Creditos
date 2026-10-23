@@ -1,6 +1,6 @@
-from datetime import date, timedelta
-
 import pytest
+
+from app import clock
 
 URL = "/api/v1/credits"
 
@@ -39,7 +39,7 @@ def test_create_credit_normalizes_client_name_spaces(create_credit):
         ("term_months", "12"),
         ("issue_date", "1999-12-31"),
         ("issue_date", "31/12/2026"),
-        ("issue_date", (date.today() + timedelta(days=1)).isoformat()),
+        ("issue_date", "2999-12-31"),
     ],
 )
 def test_create_credit_rejects_invalid_data(client, valid_credit, field, value):
@@ -47,6 +47,30 @@ def test_create_credit_rejects_invalid_data(client, valid_credit, field, value):
 
     assert response.status_code == 422
     assert field in response.get_json()["errors"]["json"]
+
+
+@pytest.mark.parametrize("name", ["María-José Peña", "O'Connor Ruiz", "Juan Pérez Jr.", "J. Ñúñez"])
+def test_create_credit_accepts_compound_names(create_credit, name):
+    assert create_credit(client_name=name)["client_name"] == name
+
+
+def test_typographic_apostrophe_is_stored_as_a_plain_one(create_credit):
+    assert create_credit(client_name="O’Connor")["client_name"] == "O'Connor"
+
+
+@pytest.mark.parametrize("name", ["Ana--Paz", "Ana Paz-", "Ana 3", "=SUM(A1)"])
+def test_create_credit_rejects_malformed_names(client, valid_credit, name):
+    response = client.post(URL, json={**valid_credit, "client_name": name})
+
+    assert response.status_code == 422
+
+
+def test_search_ignores_case_in_accented_letters(client, create_credit):
+    create_credit(client_name="Ángel Ñúñez")
+
+    body = client.get(f"{URL}?client_name=ángel ñúñez").get_json()
+
+    assert [c["client_name"] for c in body["items"]] == ["Ángel Ñúñez"]
 
 
 def test_create_credit_explains_each_rule(client, valid_credit):
@@ -60,7 +84,7 @@ def test_create_credit_explains_each_rule(client, valid_credit):
 
 
 def test_create_credit_accepts_trailing_zeros_and_today(create_credit):
-    created = create_credit(amount="1500.500", interest_rate="9.50", issue_date=date.today().isoformat())
+    created = create_credit(amount="1500.500", interest_rate="9.50", issue_date=clock.today().isoformat())
 
     assert created["amount"] == "1500.50"
     assert created["interest_rate"] == "9.50"
@@ -134,11 +158,15 @@ def test_update_credit_validates_data(client, create_credit, valid_credit):
     assert response.status_code == 422
 
 
-def test_delete_credit(client, create_credit):
+def test_delete_credit_requires_archiving_it_first(client, create_credit):
     created = create_credit()
 
+    refused = client.delete(f"{URL}/{created['id']}")
+    client.post(f"{URL}/{created['id']}/archive")
     response = client.delete(f"{URL}/{created['id']}")
 
+    assert refused.status_code == 409
+    assert refused.get_json()["message"] == "Archiva el crédito antes de eliminarlo definitivamente."
     assert response.status_code == 204
     assert client.get(f"{URL}/{created['id']}").status_code == 404
 

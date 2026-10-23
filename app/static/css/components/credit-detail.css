@@ -96,6 +96,10 @@
     background: var(--app-chart-3);
 }
 
+.detail-progress-bar.is-overdue span {
+    background: var(--app-danger);
+}
+
 .detail-progress-facts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -168,8 +172,12 @@
     border-color: var(--app-border);
 }
 
-.schedule-table tr.is-elapsed td {
+.schedule-table tr.is-paid td {
     color: var(--bs-secondary-color);
+}
+
+.schedule-table tr.is-overdue td {
+    background: var(--app-danger-bg);
 }
 
 .schedule-table tr.is-next td {
@@ -229,6 +237,16 @@
     color: var(--app-chart-3);
 }
 
+.timeline-icon-muted {
+    background: var(--app-surface-muted);
+    color: var(--bs-secondary-color);
+}
+
+.timeline-icon-danger {
+    background: var(--app-danger-bg);
+    color: var(--app-danger);
+}
+
 .timeline-title {
     margin-bottom: 0.1rem;
     font-weight: 600;
@@ -264,4 +282,116 @@
     .detail-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
+
+/* Archived and overdue notices at the top of the panel */
+.detail-notice {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.detail-notice[hidden] {
+    display: none;
+}
+
+.detail-notice-muted {
+    background: var(--app-surface-muted);
+    color: var(--bs-secondary-color);
+    box-shadow: inset 0 0 0 1px var(--app-border);
+}
+
+.detail-notice-danger {
+    background: var(--app-danger-bg);
+    color: var(--app-danger);
+    font-weight: 500;
+}
+
+/* Paid, overdue or pending label of each installment */
+.installment-status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.installment-paid {
+    color: var(--app-chart-3);
+}
+
+.installment-overdue {
+    color: var(--app-danger);
+}
+
+.installment-pending {
+    color: var(--bs-secondary-color);
+}
+
+/* Payments tab */
+.payment-form {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px dashed var(--app-border);
+    border-radius: 0.8rem;
+    background: var(--app-surface-muted);
+}
+
+.payment-form-title {
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+}
+
+.payment-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.payment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.payment-item:last-child {
+    border-bottom: 0;
+}
+
+.payment-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--app-chart-3);
+}
+
+.payment-info {
+    min-width: 0;
+}
+
+.payment-info p {
+    margin: 0;
+}
+
+.payment-amount {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.payment-meta,
+.payment-note {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+}
+
+.payment-note {
+    overflow-wrap: anywhere;
 }

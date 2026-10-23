@@ -6,10 +6,27 @@ const MAX_AMOUNT = 999999999999.99;
 // Plain decimal with at most two significant places (1.500 is fine, 1.505 is not)
 const CENTS = /^\d+(\.\d{0,2}0*)?$/;
 const PLACES_MESSAGE = "Usa como máximo 2 decimales.";
+// Same rule as the API: words joined by a space, hyphen or apostrophe, each optionally ending in a period
+const CLIENT_NAME = /^[A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]*\.?(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+\.?)*$/;
+
+function checkClientName(value) {
+    const name = value.replace(/’/g, "'").split(/\s+/).filter(Boolean).join(" ");
+    if (name.length < 3 || name.length > 100) return "El nombre debe tener entre 3 y 100 caracteres.";
+    return CLIENT_NAME.test(name)
+        || "Debe empezar con mayúscula y usar letras, espacios, guion, apóstrofo o punto.";
+}
 
 function checkDate(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value < "2000-01-01") return "Ingresa una fecha válida posterior al 01/01/2000.";
     return value <= todayIso() || "La fecha no puede ser posterior a hoy.";
+}
+
+// Forms that are not about credits validate their own fields with the browser rules (minlength, required...)
+function checkNative(input) {
+    if (input.validity.valid) return true;
+    if (input.validity.valueMissing) return "Este campo es obligatorio.";
+    if (input.validity.tooShort) return `Debe tener al menos ${input.minLength} caracteres.`;
+    return input.validationMessage;
 }
 
 function checkCents(value, min, max, rangeMessage) {
@@ -20,18 +37,22 @@ function checkCents(value, min, max, rangeMessage) {
 
 // Same rules as the API; messages are shown to the user, so they stay in Spanish
 const VALIDATORS = {
-    client_name: value => /^[A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,99}$/.test(value)
-        || "Debe empezar con mayúscula y contener solo letras y espacios (3 a 100 caracteres).",
+    client_name: checkClientName,
     issue_date: checkDate,
     amount: value => checkCents(value, 0.01, MAX_AMOUNT, "El monto debe ser mayor a 0 y como máximo 999,999,999,999.99."),
     interest_rate: value => checkCents(value, 0.01, 100, "La tasa debe ser mayor a 0 y como máximo 100."),
     term_months: value => (/^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 360)
         || "El plazo debe ser un número entero entre 1 y 360 meses.",
+    // Payments: the API also checks the issue date and what is left to pay
+    paid_on: checkDate,
+    note: value => value.length <= 200 || "La nota debe tener como máximo 200 caracteres.",
 };
 
-const validatedFields = form => [...form.elements].filter(element => element.name in VALIDATORS);
+// Fields with a rule above, plus any field of a form marked data-native-validation
+const validatedFields = form => [...form.elements].filter(element => element.name in VALIDATORS
+    || (form.dataset.nativeValidation !== undefined && element.name && element.willValidate));
 
-function setFieldError(input, message) {
+export function setFieldError(input, message) {
     input.classList.toggle("is-invalid", Boolean(message));
     const feedback = document.getElementById(`${input.id}-error`);
     if (feedback) feedback.textContent = message;
@@ -43,8 +64,9 @@ export function isValidValue(name, value) {
 }
 
 export function validateField(input) {
-    if (!(input.name in VALIDATORS)) return true;
-    const result = VALIDATORS[input.name](input.value.trim());
+    let result = true;
+    if (input.form?.dataset.nativeValidation !== undefined) result = checkNative(input);
+    else if (input.name in VALIDATORS) result = VALIDATORS[input.name](input.value.trim());
     setFieldError(input, typeof result === "string" ? result : "");
     return typeof result !== "string";
 }

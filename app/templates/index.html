@@ -13,6 +13,11 @@
     {% include "views/register.html" %}
 </section>
 {% endif %}
+{% if can("users:manage") %}
+<section class="app-view" data-view="users" hidden>
+    {% include "views/users.html" %}
+</section>
+{% endif %}
 {% endblock %}
 
 {% block overlays %}
@@ -20,4 +25,8 @@
 {% if can("credits:update") %}
 {% include "components/edit-modal.html" %}
 {% endif %}
+{% if can("users:manage") %}
+{% include "components/user-modal.html" %}
+{% endif %}
+{% include "components/password-modal.html" %}
 {% endblock %}

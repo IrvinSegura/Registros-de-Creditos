@@ -7,8 +7,10 @@ from app.schemas.credit import (
     CreditSchema,
     CreditSummarySchema,
     DateRangeSchema,
+    PaymentSchema,
     QuoteQuerySchema,
     QuoteSchema,
+    StatementQuerySchema,
 )
 
 __all__ = [
@@ -20,6 +22,8 @@ __all__ = [
     "CreditSchema",
     "CreditSummarySchema",
     "DateRangeSchema",
+    "PaymentSchema",
     "QuoteQuerySchema",
     "QuoteSchema",
+    "StatementQuerySchema",
 ]

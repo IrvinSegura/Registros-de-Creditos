@@ -1,6 +1,7 @@
 // Rows of the credits table, built with textContent so user data is never parsed as HTML
 import { formatCurrency, formatDate, formatMonths, formatPercent, initials } from "../lib/format.js";
 import { can, PERMISSIONS } from "../lib/session.js";
+import { buildStatusBadge, creditStatus } from "../lib/status.js";
 
 const COLUMNS = 7;
 
@@ -29,8 +30,15 @@ export function buildCreditRow(credit) {
     term.dataset.label = "Plazo";
     term.appendChild(buildProgress(credit));
 
+    const status = creditStatus(credit);
     const balance = textCell(formatCurrency(credit.standing.outstanding_balance), "text-end numeric", "Saldo pendiente");
-    if (credit.standing.status === "completed") balance.classList.add("text-body-secondary");
+    if (status === "completed" || status === "archived") balance.classList.add("text-body-secondary");
+    if (status === "overdue") {
+        const overdue = document.createElement("span");
+        overdue.className = "balance-overdue";
+        overdue.textContent = `Vencido ${formatCurrency(credit.standing.overdue_amount)}`;
+        balance.appendChild(overdue);
+    }
 
     const actions = document.createElement("td");
     actions.className = "text-end cell-actions";
@@ -39,15 +47,17 @@ export function buildCreditRow(credit) {
     actionGroup.append(
         actionButton("view", "btn-outline-secondary", "bi-eye", `Ver detalle del crédito de ${credit.client_name}`, credit),
     );
-    if (can(PERMISSIONS.update)) {
+    // Archived credits are read-only: they can only be viewed or restored
+    if (can(PERMISSIONS.update) && status !== "archived") {
         actionGroup.append(
             actionButton("edit", "btn-outline-primary", "bi-pencil", `Editar crédito de ${credit.client_name}`, credit),
         );
     }
-    if (can(PERMISSIONS.delete)) {
-        actionGroup.append(
-            actionButton("delete", "btn-outline-danger", "bi-trash3", `Eliminar crédito de ${credit.client_name}`, credit),
-        );
+    if (can(PERMISSIONS.archive)) {
+        actionGroup.append(status === "archived"
+            ? actionButton("restore", "btn-outline-secondary", "bi-arrow-counterclockwise",
+                `Restaurar crédito de ${credit.client_name}`, credit)
+            : actionButton("archive", "btn-outline-secondary", "bi-archive", `Archivar crédito de ${credit.client_name}`, credit));
     }
     actions.appendChild(actionGroup);
 
@@ -63,22 +73,21 @@ export function buildCreditRow(credit) {
     return row;
 }
 
-// Installments elapsed out of the term, with a bar; finished credits show a badge instead of the count
+// Installments paid out of the term, with a bar; other statuses than "active" also show a badge
 export function buildProgress(credit) {
-    const { installments_elapsed: elapsed, status } = credit.standing;
-    const completed = status === "completed";
+    const { installments_paid: paid } = credit.standing;
+    const status = creditStatus(credit);
     const wrapper = document.createElement("div");
-    wrapper.className = `term-progress${completed ? " is-completed" : ""}`;
+    wrapper.className = `term-progress is-${status}`;
 
     const label = document.createElement("span");
     label.className = "term-progress-label";
-    if (completed) {
-        const badge = document.createElement("span");
-        badge.className = "badge rounded-pill status-badge status-completed";
-        badge.textContent = "Concluido";
-        label.append(badge, ` ${formatMonths(credit.term_months)}`);
+    if (status === "completed") {
+        label.append(buildStatusBadge(status), ` ${formatMonths(credit.term_months)}`);
+    } else if (status === "active") {
+        label.textContent = `${paid} de ${credit.term_months} cuotas`;
     } else {
-        label.textContent = `${elapsed} de ${credit.term_months} cuotas`;
+        label.append(buildStatusBadge(status), ` ${paid} de ${credit.term_months}`);
     }
 
     const bar = document.createElement("span");
@@ -86,10 +95,10 @@ export function buildProgress(credit) {
     bar.setAttribute("role", "progressbar");
     bar.setAttribute("aria-valuemin", "0");
     bar.setAttribute("aria-valuemax", String(credit.term_months));
-    bar.setAttribute("aria-valuenow", String(elapsed));
-    bar.setAttribute("aria-label", `${elapsed} de ${credit.term_months} cuotas transcurridas`);
+    bar.setAttribute("aria-valuenow", String(paid));
+    bar.setAttribute("aria-label", `${paid} de ${credit.term_months} cuotas pagadas`);
     const fill = document.createElement("span");
-    fill.style.width = `${(elapsed / credit.term_months) * 100}%`;
+    fill.style.width = `${(paid / credit.term_months) * 100}%`;
     bar.appendChild(fill);
 
     wrapper.append(label, bar);

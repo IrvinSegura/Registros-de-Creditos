@@ -1,17 +1,40 @@
 import { buildCreditRow, buildSkeletonRows } from "../components/credit-rows.js";
 import { creditsApi, userMessage } from "../lib/api.js";
-import { deleteCredit } from "../lib/credit-actions.js";
+import { archiveCredit, restoreCredit } from "../lib/credit-actions.js";
 import { onCreditsChanged } from "../lib/events.js";
 import { formatInteger } from "../lib/format.js";
 import { notifyError } from "../lib/notify.js";
 
-const PER_PAGE = 10;
+const PAGE_SIZES = [10, 25, 50, 100];
+const PAGE_SIZE_KEY = "credits:perPage";
 const SEARCH_DELAY_MS = 300;
 const SKELETON_ROWS = 4;
 const FILTER_FIELDS = ["issue_date_from", "issue_date_to", "amount_min", "amount_max"];
+const EMPTY_STATUS_TEXT = {
+    active: "No hay créditos vigentes al corriente.",
+    overdue: "Ningún crédito tiene cuotas vencidas sin pagar.",
+    completed: "Todavía no hay créditos liquidados.",
+    archived: "No hay créditos archivados.",
+};
 
-const state = { page: 1, clientName: "", sort: "id", order: "asc", filters: {}, requestId: 0 };
+const state = {
+    page: 1, perPage: savedPageSize(), clientName: "", status: "", sort: "id", order: "asc", filters: {}, requestId: 0,
+};
 let elements;
+
+// The page size is a per-browser preference; storage may be unavailable (private windows)
+function savedPageSize() {
+    try {
+        const value = Number(localStorage.getItem(PAGE_SIZE_KEY));
+        return PAGE_SIZES.includes(value) ? value : PAGE_SIZES[0];
+    } catch (error) {
+        return PAGE_SIZES[0];
+    }
+}
+
+function savePageSize(value) {
+    try { localStorage.setItem(PAGE_SIZE_KEY, String(value)); } catch (error) { /* storage unavailable */ }
+}
 
 export function initCredits({ onView, onEdit }) {
     elements = {
@@ -27,7 +50,10 @@ export function initCredits({ onView, onEdit }) {
         filtersForm: document.getElementById("filters-form"),
         filtersError: document.getElementById("filters-error"),
         filtersCount: document.getElementById("filters-count"),
-        exportLink: document.getElementById("export-csv"),
+        status: document.getElementById("credits-status"),
+        statusFilter: document.getElementById("status-filter"),
+        pageSize: document.getElementById("page-size"),
+        exportLinks: document.querySelectorAll("[data-export]"),
         sortButtons: document.querySelectorAll(".sort-btn"),
     };
 
@@ -44,6 +70,17 @@ export function initCredits({ onView, onEdit }) {
     elements.filtersForm.addEventListener("submit", event => { event.preventDefault(); applyFilters(); });
     document.getElementById("filters-clear").addEventListener("click", clearFilters);
 
+    elements.statusFilter.addEventListener("change", () => {
+        state.status = elements.statusFilter.value;
+        reload();
+    });
+    elements.pageSize.value = String(state.perPage);
+    elements.pageSize.addEventListener("change", () => {
+        state.perPage = Number(elements.pageSize.value);
+        savePageSize(state.perPage);
+        reload();
+    });
+
     elements.prev.addEventListener("click", () => { state.page -= 1; loadCredits(); });
     elements.next.addEventListener("click", () => { state.page += 1; loadCredits(); });
 
@@ -54,7 +91,8 @@ export function initCredits({ onView, onEdit }) {
         const id = Number(button.dataset.id);
         if (button.dataset.action === "view") onView(id);
         if (button.dataset.action === "edit") onEdit?.(id);
-        if (button.dataset.action === "delete") deleteCredit(id, button.dataset.name);
+        if (button.dataset.action === "archive") archiveCredit(id, button.dataset.name);
+        if (button.dataset.action === "restore") restoreCredit(id);
     });
 
     onCreditsChanged(() => loadCredits());
@@ -107,17 +145,17 @@ function clearFilters() {
 }
 
 function currentQuery() {
-    return { client_name: state.clientName, sort: state.sort, order: state.order, ...state.filters };
+    return { client_name: state.clientName, status: state.status, sort: state.sort, order: state.order, ...state.filters };
 }
 
 async function loadCredits() {
     // Ignore responses that arrive after a newer request (fast typing, quick sorting)
     const requestId = ++state.requestId;
-    elements.exportLink.href = creditsApi.exportUrl(currentQuery());
+    elements.exportLinks.forEach(link => { link.href = creditsApi.exportUrl(currentQuery(), link.dataset.export); });
     renderSkeleton();
 
     try {
-        const { items, meta } = await creditsApi.list({ page: state.page, perPage: PER_PAGE, ...currentQuery() });
+        const { items, meta } = await creditsApi.list({ page: state.page, perPage: state.perPage, ...currentQuery() });
         if (requestId !== state.requestId) return;
 
         // After deleting the last credit of a page, go back to the previous one
@@ -140,16 +178,21 @@ function render(items, meta) {
     const isEmpty = items.length === 0;
     elements.empty.hidden = !isEmpty;
     if (isEmpty) {
-        const filtered = Boolean(state.clientName) || Object.keys(state.filters).length > 0;
+        const searched = Boolean(state.clientName) || Object.keys(state.filters).length > 0;
+        const filtered = searched || Boolean(state.status);
         elements.emptyTitle.textContent = filtered ? "Sin resultados" : "Aún no hay créditos registrados";
-        elements.emptyText.textContent = filtered
-            ? "Ningún crédito coincide con la búsqueda o los filtros."
-            : "Registra el primer crédito para verlo aquí.";
+        if (searched) elements.emptyText.textContent = "Ningún crédito coincide con la búsqueda o los filtros.";
+        else if (state.status) elements.emptyText.textContent = EMPTY_STATUS_TEXT[state.status];
+        else elements.emptyText.textContent = "Registra el primer crédito para verlo aquí.";
         // Not rendered for roles that cannot register credits
         if (elements.emptyAction) elements.emptyAction.hidden = filtered;
     }
 
     const pages = Math.max(meta.pages, 1);
+    const found = meta.total === 1 ? "crédito encontrado" : "créditos encontrados";
+    elements.status.textContent = meta.total === 0
+        ? "No se encontraron créditos."
+        : `${formatInteger(meta.total)} ${found}, página ${meta.page} de ${pages}.`;
     elements.pageInfo.textContent = `Página ${meta.page} de ${pages} · ${formatInteger(meta.total)} créditos`;
     elements.prev.disabled = meta.page <= 1;
     elements.next.disabled = meta.page >= meta.pages;
