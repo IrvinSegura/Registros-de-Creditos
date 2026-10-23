@@ -8,8 +8,8 @@ from app.auth.views import auth_bp
 from app.extensions import login_manager
 from app.services import user_service
 
-# Endpoints reachable without signing in
-PUBLIC_ENDPOINTS = frozenset({"auth.login", "static"})
+# Endpoints reachable without signing in; the health check reveals nothing but "ok"
+PUBLIC_ENDPOINTS = frozenset({"auth.login", "static", "web.health"})
 # JSON endpoints answer 401; everything else (pages, API docs) redirects to the sign-in page
 JSON_API_PATH = "/api/v"
 
