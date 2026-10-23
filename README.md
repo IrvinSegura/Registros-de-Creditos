@@ -22,6 +22,8 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 ✅ Panel con **filtro de periodo**, indicadores de cartera, monto por mes, créditos por plazo y **clientes con mayor monto**.<br>
 ✅ Validaciones en los formularios, alineadas con las de la API.<br>
 ✅ Menú lateral, tema claro y oscuro, y diseño adaptable a móvil.<br>
+✅ **Inicio de sesión con roles** (Administrador, Analista y Consulta), bloqueo temporal tras intentos fallidos y protección CSRF.<br>
+✅ Historial de cambios con **el usuario que hizo cada cambio**.<br>
 ✅ Cabeceras de seguridad (CSP con nonce, X-Frame-Options, nosniff) y librerías del CDN con **hashes de integridad (SRI)**.<br>
 <br>
 ## 🔧 Instalación y Configuración
@@ -47,6 +49,9 @@ cp .env.example .env
 # Crear la base de datos aplicando las migraciones
 flask db upgrade
 
+# Crear el primer usuario (pide el nombre y la contraseña)
+flask users create admin --role admin
+
 # Ejecutar la aplicación
 flask run
 
@@ -62,6 +67,27 @@ http://127.0.0.1:5000/
 | `DATABASE_URL` | URL de la base de datos (las rutas SQLite relativas se crean en `instance/`) | `sqlite:///credits.db` |
 | `CORS_ORIGINS` | Orígenes permitidos para llamar a `/api/*` desde otro dominio, separados por comas | vacío (ninguno) |
 
+## 👥 Usuarios y roles
+Toda la aplicación y la API requieren iniciar sesión. Las cuentas se administran desde la terminal:
+
+```sh
+flask users create <usuario> --role analyst   # admin | analyst | viewer
+flask users list
+flask users set-password <usuario>            # también desbloquea la cuenta
+flask users deactivate <usuario>              # cierra sus sesiones abiertas
+flask users activate <usuario>
+```
+
+| Rol | Consultar y exportar | Registrar y editar | Eliminar |
+|---|:---:|:---:|:---:|
+| `admin` (Administrador) | ✅ | ✅ | ✅ |
+| `analyst` (Analista) | ✅ | ✅ | ❌ |
+| `viewer` (Consulta) | ✅ | ❌ | ❌ |
+
+- Las contraseñas se guardan con hash (scrypt) y deben tener al menos 10 caracteres.
+- Tras 5 intentos fallidos la cuenta se bloquea 15 minutos.
+- La sesión dura 8 horas; la cookie es `HttpOnly`, `SameSite=Lax` y, en producción, `Secure`.
+
 ## 🗂 Estructura del proyecto
 ```
 app/
@@ -69,15 +95,19 @@ app/
 ├── config.py          # Configuración por entorno
 ├── extensions.py      # SQLAlchemy, Migrate, Api (OpenAPI), CORS
 ├── errors.py          # Errores de dominio y su respuesta JSON
-├── security.py        # Cabeceras de seguridad y Content Security Policy
+├── security.py        # Cabeceras de seguridad, Content Security Policy y tokens CSRF
+├── auth/              # Inicio de sesión, protección de rutas y permisos por rol
+├── cli.py             # Comandos `flask users ...`
 ├── models/            # Modelos SQLAlchemy: crédito e historial de cambios
 ├── schemas/           # Validación y serialización (marshmallow)
 ├── services/          # Lógica de negocio y cálculo de amortización, sin dependencias de HTTP
 ├── api/v1/            # Endpoints REST versionados
 ├── web/               # Páginas renderizadas en el servidor
 ├── templates/
-│   ├── base.html      # Layout: menú lateral, barra superior, tema y librerías
+│   ├── base.html      # Esqueleto HTML: tema y librerías
+│   ├── app.html       # Layout de la aplicación: menú lateral, barra superior y usuario
 │   ├── index.html     # Vistas de la aplicación
+│   ├── auth/          # Página de inicio de sesión
 │   ├── macros/        # Campos de formulario compartidos
 │   ├── views/         # Una plantilla por vista: dashboard, credits, register
 │   └── components/    # Paneles compartidos: credit-detail, edit-modal
@@ -112,6 +142,8 @@ La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especif
 | `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito y su historial |
 | `GET` | `/api/v1/credits/{id}/amortization` | Tabla de amortización del crédito |
 | `GET` | `/api/v1/credits/{id}/history` | Historial de cambios, del más reciente al más antiguo |
+
+Todas las rutas requieren una sesión iniciada (sin ella responden `401`). Las peticiones que modifican datos (`POST`, `PUT`, `DELETE`) deben enviar además la cabecera `X-CSRF-Token` con el token de la página, y el rol del usuario debe permitir la acción (si no, `403`).
 
 La tasa de interés es **anual** y se paga mensualmente. La cuota se calcula con el sistema de cuota fija (francés) y la última cuota absorbe el redondeo para que el saldo termine exactamente en cero.
 
