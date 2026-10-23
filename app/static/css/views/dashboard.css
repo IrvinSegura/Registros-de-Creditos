@@ -6,33 +6,140 @@
     gap: 0.75rem;
 }
 
-.period-presets .btn {
+/* Segmented control: one option active at a time */
+.segmented {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.25rem;
+    border: 1px solid var(--app-border);
+    border-radius: 0.8rem;
     background: var(--app-surface);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.period-presets .btn.active {
+.segmented-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.85rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.segmented-option:hover {
+    background: var(--app-surface-muted);
+    color: var(--bs-body-color);
+}
+
+.segmented-option:focus-visible {
+    outline: 2px solid rgba(var(--app-primary-rgb), 0.6);
+    outline-offset: 1px;
+}
+
+.segmented-option.is-active {
     background: var(--app-primary);
-    border-color: var(--app-primary);
     color: #fff;
+    box-shadow: 0 1px 3px rgba(var(--app-primary-rgb), 0.35);
 }
 
-[data-bs-theme="dark"] .period-presets .btn.active {
+[data-bs-theme="dark"] .segmented-option.is-active {
     color: #0e121a;
 }
 
-.period-custom {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.period-caret {
+    font-size: 0.7rem;
+    transition: transform 0.15s ease;
 }
 
-.period-custom[hidden] {
+.segmented-option[aria-expanded="true"] .period-caret {
+    transform: rotate(180deg);
+}
+
+/* Custom range dropdown */
+.period-menu {
+    width: min(22rem, calc(100vw - 2rem));
+    padding: 1rem;
+    border: 1px solid var(--app-border);
+    border-radius: 0.9rem;
+    background: var(--app-surface);
+    box-shadow: var(--app-shadow);
+}
+
+.period-menu-title {
+    margin-bottom: 0.15rem;
+    font-weight: 600;
+}
+
+.period-menu-hint {
+    margin-bottom: 0.9rem;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+}
+
+.period-menu-error {
+    min-height: 1.2rem;
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--bs-form-invalid-color);
+}
+
+.period-menu-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Active period, with a button to go back to the whole history */
+.period-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.2rem;
+    padding: 0.3rem 0.4rem 0.3rem 0.85rem;
+    border: 1px solid var(--app-border);
+    border-radius: 999px;
+    background: var(--app-surface);
+    color: var(--bs-secondary-color);
+    font-size: 0.85rem;
+}
+
+.period-summary > span {
+    padding-right: 0.45rem;
+    color: var(--bs-body-color);
+    font-weight: 500;
+}
+
+.period-clear {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-left: -0.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--bs-secondary-color);
+    font-size: 0.7rem;
+}
+
+.period-clear[hidden] {
     display: none;
 }
 
-.period-label {
-    font-size: 0.85rem;
-    color: var(--bs-secondary-color);
+.period-clear:hover,
+.period-clear:focus-visible {
+    background: var(--app-surface-muted);
+    color: var(--bs-body-color);
 }
 
 .kpi-card .card-body {
@@ -262,28 +369,20 @@
     display: none;
 }
 
-/* ---------- Phones: presets in a 2 x 2 grid instead of a scrolling strip ---------- */
+/* ---------- Phones: presets in a grid instead of a scrolling strip ---------- */
 @media (max-width: 575.98px) {
     .period-presets {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.5rem;
         width: 100%;
-    }
-
-    /* Bootstrap joins grouped buttons; here each one stands alone */
-    .period-presets > .btn {
-        margin-left: 0 !important;
-        border-radius: 0.6rem !important;
     }
 
     .period-custom {
-        width: 100%;
+        grid-column: 1 / -1;
     }
 
-    .period-custom .form-control {
-        flex: 1;
-        min-width: 0;
+    .period-custom .segmented-option {
+        width: 100%;
     }
 
     /* KPI cards turn horizontal: icon on the left, text on the right */
