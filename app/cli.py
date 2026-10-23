@@ -1,13 +1,14 @@
-"""`flask users ...` commands to manage accounts from the terminal."""
+"""`flask users ...` and `flask backup ...` commands, to manage accounts and database copies from the terminal."""
 
 import click
 from flask.cli import AppGroup
 
 from app.auth.permissions import ROLE_LABELS, ROLES
 from app.errors import DomainError
-from app.services import user_service
+from app.services import backup_service, user_service
 
 users_cli = AppGroup("users", help="Manage user accounts.")
+backup_cli = AppGroup("backup", help="Copy the SQLite database.")
 
 # Output is read by whoever runs the command, so it stays in Spanish like the rest of the interface
 _ROLE_HELP = ", ".join(f"{role} ({label})" for role, label in ROLE_LABELS.items())
@@ -43,6 +44,19 @@ def list_users() -> None:
         click.echo(f"{user.username:<20} {user.full_name:<30} {ROLE_LABELS.get(user.role, user.role):<14} {status}")
 
 
+@users_cli.command("sign-ins")
+@click.option("--limit", default=20, show_default=True, help="How many attempts to show, newest first.")
+def sign_ins(limit: int) -> None:
+    """Show the latest sign-in attempts (kept for 90 days)."""
+    attempts = user_service.recent_sign_ins(limit)
+    if not attempts:
+        click.echo("Todavía no hay intentos de inicio de sesión registrados.")
+        return
+    for attempt in attempts:
+        result = "correcto" if attempt.succeeded else "fallido"
+        click.echo(f"{attempt.attempted_at:%Y-%m-%d %H:%M} UTC  {attempt.ip_address:<39} {attempt.username:<20} {result}")
+
+
 @users_cli.command("set-password")
 @click.argument("username")
 @click.password_option("--password", prompt="Nueva contraseña", confirmation_prompt="Repite la contraseña")
@@ -74,3 +88,21 @@ def activate(username: str) -> None:
     """Allow a deactivated account to sign in again."""
     user = _run(lambda: user_service.set_active(username, True))
     click.echo(f"Usuario '{user.username}' activado.")
+
+
+@backup_cli.command("create")
+def create_backup() -> None:
+    """Copy the database now; keeps the newest BACKUP_KEEP copies."""
+    path = _run(backup_service.create_backup)
+    click.echo(f"Respaldo guardado en {path}")
+
+
+@backup_cli.command("list")
+def list_backups() -> None:
+    """List the saved copies, oldest first."""
+    backups = backup_service.list_backups()
+    if not backups:
+        click.echo(f"Todavía no hay respaldos en {backup_service.backup_dir()}")
+        return
+    for backup in backups:
+        click.echo(f"{backup.created_at:%Y-%m-%d %H:%M}  {backup.size / 1024:>10,.0f} KB  {backup.path}")

@@ -2,7 +2,9 @@ import pytest
 
 from app.cli import users_cli
 from app.services import user_service
-from app.services.user_service import MAX_FAILED_LOGINS, UserError
+from app.extensions import db
+from app.models import LoginAttempt
+from app.services.user_service import ADDRESS_WINDOW, MAX_FAILED_LOGINS, MAX_FAILED_PER_ADDRESS, UserError
 from tests.conftest import PASSWORD, sign_in
 
 URL = "/api/v1/credits"
@@ -119,6 +121,56 @@ def test_successful_sign_in_resets_the_failure_count(app, make_user):
     user = user_service.find_user("admin")
     assert user.failed_logins == 0
     assert user.last_login_at is not None
+
+
+def client_from(app, address):
+    client = app.test_client()
+    client.environ_base["REMOTE_ADDR"] = address
+    return client
+
+
+def test_address_is_blocked_after_failures_on_any_usernames(app, make_user):
+    make_user()
+    attacker = client_from(app, "203.0.113.7")
+    for number in range(MAX_FAILED_PER_ADDRESS):
+        assert sign_in(attacker, f"ghost{number}", "wrong-password").status_code == 401
+
+    blocked = sign_in(attacker, "admin")
+
+    assert blocked.status_code == 429
+    assert "Demasiados intentos fallidos desde esta conexión" in blocked.get_data(as_text=True)
+    # Other addresses, and the account itself, are not affected
+    assert sign_in(client_from(app, "198.51.100.1"), "admin").status_code == 302
+
+
+def test_address_block_ends_with_the_window(app, make_user):
+    make_user()
+    attacker = client_from(app, "203.0.113.7")
+    for number in range(MAX_FAILED_PER_ADDRESS):
+        sign_in(attacker, f"ghost{number}", "wrong-password")
+
+    # Move the failures back in time, past the window
+    for attempt in db.session.scalars(db.select(LoginAttempt)):
+        attempt.attempted_at = attempt.attempted_at - ADDRESS_WINDOW
+    db.session.commit()
+
+    assert sign_in(attacker, "admin").status_code == 302
+
+
+def test_every_attempt_is_logged(app, make_user):
+    make_user()
+    sign_in(client_from(app, "203.0.113.7"), "admin", "wrong-password")
+    sign_in(client_from(app, "203.0.113.8"), "admin")
+
+    attempts = user_service.recent_sign_ins()
+
+    assert [(a.ip_address, a.username, a.succeeded) for a in attempts] == [
+        ("203.0.113.8", "admin", True),
+        ("203.0.113.7", "admin", False),
+    ]
+    listed = app.test_cli_runner().invoke(users_cli, ["sign-ins"])
+    assert "203.0.113.7" in listed.output
+    assert "fallido" in listed.output
 
 
 def test_session_cookie_is_http_only_and_same_site(app, make_user):
