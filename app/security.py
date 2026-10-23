@@ -1,13 +1,22 @@
-"""HTTP security headers, including a Content Security Policy with a per-request nonce."""
+"""HTTP security: headers with a per-request CSP nonce, and CSRF tokens for state-changing requests."""
 
 import secrets
+from http import HTTPStatus
 
-from flask import Flask, Response, g, request
+from flask import Flask, Response, flash, g, redirect, request, session, url_for
+
+from app.errors import DomainError
 
 CDN = "https://cdn.jsdelivr.net"
 FONTS_CSS = "https://fonts.googleapis.com"
 FONTS_FILES = "https://fonts.gstatic.com"
 DOCS_PATH = "/api/docs"
+API_PATH = "/api/"
+
+CSRF_SESSION_KEY = "csrf_token"
+CSRF_HEADER = "X-CSRF-Token"
+CSRF_FIELD = "csrf_token"
+SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 def _app_policy(nonce: str) -> str:
@@ -62,3 +71,43 @@ def register_security_headers(app: Flask) -> None:
         if app.config["ENV_NAME"] == "production":
             response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return response
+
+
+class CsrfError(DomainError):
+    status = HTTPStatus.FORBIDDEN
+
+    def __init__(self):
+        super().__init__("La página expiró. Recárgala e intenta de nuevo.")
+
+
+def csrf_token() -> str:
+    """The session's CSRF token, created on first use."""
+    if CSRF_SESSION_KEY not in session:
+        session[CSRF_SESSION_KEY] = secrets.token_urlsafe(32)
+    return session[CSRF_SESSION_KEY]
+
+
+def rotate_csrf_token() -> str:
+    # Called on sign-in so a token seen before authenticating is no longer valid
+    session[CSRF_SESSION_KEY] = secrets.token_urlsafe(32)
+    return session[CSRF_SESSION_KEY]
+
+
+def register_csrf_protection(app: Flask) -> None:
+    @app.context_processor
+    def inject_csrf_token() -> dict:
+        return {"csrf_token": csrf_token}
+
+    @app.before_request
+    def check_csrf_token():
+        if request.method in SAFE_METHODS:
+            return None
+        sent = request.headers.get(CSRF_HEADER) or request.form.get(CSRF_FIELD, "")
+        expected = session.get(CSRF_SESSION_KEY, "")
+        if expected and secrets.compare_digest(sent.encode(), expected.encode()):
+            return None
+        if request.path.startswith(API_PATH):
+            raise CsrfError()
+        # Page forms (sign-in, sign-out) go back to the sign-in page with the reason
+        flash(CsrfError().message, "error")
+        return redirect(url_for("auth.login"))
