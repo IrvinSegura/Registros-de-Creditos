@@ -23,6 +23,7 @@
                 <span class="kpi-icon kpi-icon-primary" aria-hidden="true"><i class="bi bi-files"></i></span>
                 <p class="kpi-label">Créditos otorgados</p>
                 <p class="kpi-value" id="kpi-total-credits">—</p>
+                <p class="kpi-hint" id="kpi-credit-status"></p>
             </div>
         </div>
     </div>
@@ -30,7 +31,7 @@
         <div class="card app-card kpi-card h-100">
             <div class="card-body">
                 <span class="kpi-icon kpi-icon-success" aria-hidden="true"><i class="bi bi-cash-stack"></i></span>
-                <p class="kpi-label">Monto total otorgado</p>
+                <p class="kpi-label">Monto otorgado</p>
                 <p class="kpi-value" id="kpi-total-amount">—</p>
                 <p class="kpi-hint" id="kpi-average-amount"></p>
             </div>
@@ -39,18 +40,21 @@
     <div class="col-12 col-sm-6 col-xxl-3">
         <div class="card app-card kpi-card h-100">
             <div class="card-body">
-                <span class="kpi-icon kpi-icon-warning" aria-hidden="true"><i class="bi bi-percent"></i></span>
-                <p class="kpi-label">Tasa anual promedio</p>
-                <p class="kpi-value" id="kpi-average-rate">—</p>
+                <span class="kpi-icon kpi-icon-info" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+                <p class="kpi-label">Saldo pendiente</p>
+                <p class="kpi-value" id="kpi-outstanding">—</p>
+                <div class="kpi-meter" aria-hidden="true"><span id="kpi-outstanding-meter"></span></div>
+                <p class="kpi-hint" id="kpi-outstanding-share"></p>
             </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-xxl-3">
         <div class="card app-card kpi-card h-100">
             <div class="card-body">
-                <span class="kpi-icon kpi-icon-info" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
-                <p class="kpi-label">Plazo promedio</p>
-                <p class="kpi-value" id="kpi-average-term">—</p>
+                <span class="kpi-icon kpi-icon-warning" aria-hidden="true"><i class="bi bi-percent"></i></span>
+                <p class="kpi-label">Tasa anual ponderada</p>
+                <p class="kpi-value" id="kpi-weighted-rate">—</p>
+                <p class="kpi-hint" id="kpi-rate-detail"></p>
             </div>
         </div>
     </div>
@@ -82,16 +86,38 @@
         </div>
     </div>
 
-    <div class="card app-card">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <h2 class="h6 mb-1">Clientes con mayor monto</h2>
-                    <p class="small text-body-secondary mb-0">Los 5 clientes con más monto otorgado en el periodo.</p>
+    <div class="row g-3">
+        <div class="col-12 col-xl-7">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <div class="card-heading">
+                        <div>
+                            <h2 class="h6 mb-1">Clientes con mayor monto</h2>
+                            <p class="small text-body-secondary mb-0">Los 5 clientes con más monto otorgado en el periodo.</p>
+                        </div>
+                        <i class="bi bi-trophy text-warning fs-4" aria-hidden="true"></i>
+                    </div>
+                    <ol class="top-clients" id="top-clients"></ol>
                 </div>
-                <i class="bi bi-trophy text-warning fs-4" aria-hidden="true"></i>
             </div>
-            <ol class="top-clients" id="top-clients"></ol>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="card app-card h-100">
+                <div class="card-body">
+                    <div class="card-heading">
+                        <div>
+                            <h2 class="h6 mb-1">Próximos vencimientos</h2>
+                            <p class="small text-body-secondary mb-0">Cuotas que vencen en los próximos 30 días.</p>
+                        </div>
+                        <i class="bi bi-calendar2-week text-primary fs-4" aria-hidden="true"></i>
+                    </div>
+                    <ul class="upcoming-list" id="upcoming-payments"></ul>
+                    <p class="upcoming-empty" id="upcoming-empty" hidden>
+                        <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                        Ninguna cuota vence en los próximos 30 días.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
