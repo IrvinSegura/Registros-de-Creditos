@@ -70,6 +70,11 @@ def register_security_headers(app: Flask) -> None:
         response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
         if app.config["ENV_NAME"] == "production":
             response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        # Pages and API answers carry portfolio data: keep them out of browser and proxy caches,
+        # so they are not shown again with the back button after signing out.
+        # Static files keep Flask's "no-cache" with ETag: always revalidated, never served stale.
+        if request.endpoint != "static":
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
 

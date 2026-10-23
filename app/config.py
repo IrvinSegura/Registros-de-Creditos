@@ -41,6 +41,8 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     ENV_NAME = "development"
     DEBUG = True
+    # `flask run` without --debug switches debug off, which would also keep edited templates cached
+    TEMPLATES_AUTO_RELOAD = True
 
 
 class TestingConfig(BaseConfig):
