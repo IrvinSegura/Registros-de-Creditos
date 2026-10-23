@@ -79,3 +79,34 @@ def quote(amount: Decimal, annual_rate_percent: Decimal, months: int) -> dict[st
         "total_interest": total_paid - Decimal(amount),
         "total_paid": total_paid,
     }
+
+
+@dataclass(frozen=True)
+class Standing:
+    """Where a credit stands on a given day, assuming every installment due so far was paid on time."""
+
+    status: str
+    installments_elapsed: int
+    outstanding_balance: Decimal
+    next_due_date: date | None
+    next_payment: Decimal | None
+    monthly_payment: Decimal
+
+
+ACTIVE = "active"
+COMPLETED = "completed"
+
+
+def standing(amount: Decimal, annual_rate_percent: Decimal, months: int, start: date, today: date) -> Standing:
+    schedule = build_schedule(amount, annual_rate_percent, months, start)
+    # Installments due today count as elapsed
+    elapsed = sum(1 for installment in schedule if installment.due_date <= today)
+    upcoming = schedule[elapsed] if elapsed < months else None
+    return Standing(
+        status=COMPLETED if upcoming is None else ACTIVE,
+        installments_elapsed=elapsed,
+        outstanding_balance=schedule[elapsed - 1].balance if elapsed else _round(Decimal(amount)),
+        next_due_date=upcoming.due_date if upcoming else None,
+        next_payment=upcoming.payment if upcoming else None,
+        monthly_payment=schedule[0].payment,
+    )

@@ -40,3 +40,33 @@ def test_quote_totals():
     assert result["monthly_payment"] == Decimal("888.49")
     assert result["total_paid"] == result["total_interest"] + Decimal("10000")
     assert result["total_interest"] == Decimal("661.86")
+
+
+def test_standing_before_the_first_due_date():
+    result = amortization.standing(Decimal("10000"), Decimal("12"), 12, date(2026, 1, 15), date(2026, 2, 14))
+
+    assert result.status == amortization.ACTIVE
+    assert result.installments_elapsed == 0
+    assert result.outstanding_balance == Decimal("10000.00")
+    assert result.next_due_date == date(2026, 2, 15)
+    assert result.next_payment == result.monthly_payment == Decimal("888.49")
+
+
+def test_standing_counts_installments_due_today():
+    result = amortization.standing(Decimal("10000"), Decimal("12"), 12, date(2026, 1, 15), date(2026, 3, 15))
+
+    assert result.installments_elapsed == 2
+    assert result.outstanding_balance == amortization.build_schedule(
+        Decimal("10000"), Decimal("12"), 12, date(2026, 1, 15)
+    )[1].balance
+    assert result.next_due_date == date(2026, 4, 15)
+
+
+def test_standing_after_the_last_installment():
+    result = amortization.standing(Decimal("10000"), Decimal("12"), 12, date(2025, 1, 15), date(2026, 1, 15))
+
+    assert result.status == amortization.COMPLETED
+    assert result.installments_elapsed == 12
+    assert result.outstanding_balance == Decimal("0.00")
+    assert result.next_due_date is None
+    assert result.next_payment is None
