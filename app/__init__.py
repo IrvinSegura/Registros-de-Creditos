@@ -4,10 +4,12 @@ from flask import Flask
 
 from app import models  # noqa: F401  (registers the models with SQLAlchemy and Alembic)
 from app.api.v1 import blueprints as api_v1_blueprints
+from app.auth import register_auth
+from app.cli import users_cli
 from app.config import DEFAULT_SECRET_KEY, BaseConfig, get_config
 from app.errors import register_error_handlers
 from app.extensions import api, cors, db, migrate
-from app.security import register_security_headers
+from app.security import register_csrf_protection, register_security_headers
 from app.web import web_bp
 
 
@@ -25,8 +27,12 @@ def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
     for blueprint in api_v1_blueprints:
         api.register_blueprint(blueprint)
     app.register_blueprint(web_bp)
+    # The sign-in guard runs before the CSRF check, so anonymous requests get 401 rather than 403
+    register_auth(app)
+    register_csrf_protection(app)
     register_error_handlers(app)
     register_security_headers(app)
+    app.cli.add_command(users_cli)
 
     return app
 
