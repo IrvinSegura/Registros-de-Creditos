@@ -1,0 +1,275 @@
+/* Credits view: toolbar, filters and the sortable table */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.search-box {
+    flex: 1 1 18rem;
+    max-width: 26rem;
+}
+
+.credits-header {
+    padding: 1.5rem 1.5rem 1rem;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toolbar-actions .btn {
+    white-space: nowrap;
+}
+
+.filters-panel {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px dashed var(--app-border);
+    border-radius: 0.8rem;
+    background: var(--app-surface-muted);
+}
+
+/* Keeps absolutely positioned children (visually-hidden labels) inside the horizontal scroll */
+.table-responsive {
+    position: relative;
+}
+
+.app-table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--app-surface-muted);
+}
+
+.app-table thead th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-secondary-color);
+    background: var(--app-surface-muted);
+    border-bottom: 1px solid var(--app-border);
+    padding: 0.7rem 1rem;
+    white-space: nowrap;
+}
+
+.sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+}
+
+.sort-btn::after {
+    content: "\F127"; /* bi-arrow-down-up */
+    font-family: "bootstrap-icons";
+    font-size: 0.8rem;
+    opacity: 0.35;
+}
+
+.sort-btn:hover {
+    color: var(--bs-body-color);
+}
+
+th[aria-sort="ascending"] .sort-btn,
+th[aria-sort="descending"] .sort-btn {
+    color: var(--app-primary);
+}
+
+th[aria-sort="ascending"] .sort-btn::after {
+    content: "\F148"; /* bi-arrow-up */
+    opacity: 1;
+}
+
+th[aria-sort="descending"] .sort-btn::after {
+    content: "\F128"; /* bi-arrow-down */
+    opacity: 1;
+}
+
+.app-table tbody td {
+    padding: 0.8rem 1rem;
+    border-color: var(--app-border);
+    white-space: nowrap;
+}
+
+/* Outer cells line up with the card padding */
+.app-table th:first-child,
+.app-table td:first-child {
+    padding-left: 1.5rem;
+}
+
+.app-table th:last-child,
+.app-table td:last-child {
+    padding-right: 1.5rem;
+}
+
+.app-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.app-table tbody tr:hover td {
+    background: var(--app-surface-muted);
+}
+
+.numeric {
+    font-variant-numeric: tabular-nums;
+}
+
+.client-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-weight: 500;
+    text-align: left;
+}
+
+.client-link:hover .client-name {
+    color: var(--app-primary);
+    text-decoration: underline;
+}
+
+.term-badge {
+    font-weight: 500;
+    background: var(--app-surface-muted);
+    color: var(--bs-body-color);
+    border: 1px solid var(--app-border);
+}
+
+.row-actions {
+    display: inline-flex;
+    gap: 0.35rem;
+}
+
+.row-actions .btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    display: grid;
+    place-items: center;
+}
+
+/* ---------- Narrow card: stacked rows ---------- */
+/* The card is a size container, so the table turns into stacked rows whenever the card is
+   too narrow for its columns: on phones, but also on tablets and small laptops with the sidebar open */
+.credits-card {
+    container: credits / inline-size;
+}
+
+@container credits (max-width: 54rem) {
+    .app-table thead {
+        display: none;
+    }
+
+    .app-table,
+    .app-table tbody {
+        display: block;
+    }
+
+    .app-table tbody tr {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem 1rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--app-border);
+    }
+
+    .app-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .app-table tbody td,
+    .app-table tbody td:first-child,
+    .app-table tbody td:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+        padding: 0;
+        border: 0;
+        text-align: left !important;
+        white-space: normal;
+    }
+
+    .app-table tbody td[data-label]:not(.cell-client)::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--bs-secondary-color);
+    }
+
+    .app-table tbody td.cell-client {
+        grid-column: 1 / 4;
+    }
+
+    .app-table tbody td.cell-actions {
+        grid-column: 4;
+        grid-row: 1;
+        align-items: flex-end;
+    }
+
+    .app-table tbody tr:hover td {
+        background: transparent;
+    }
+
+    .skeleton-row td:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@container credits (max-width: 34rem) {
+    .credits-header {
+        padding: 1rem;
+    }
+
+    .toolbar-actions {
+        width: 100%;
+    }
+
+    .toolbar-actions .btn {
+        flex: 1;
+    }
+
+    .search-box {
+        max-width: none;
+    }
+
+    .app-table tbody tr {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 1rem;
+    }
+
+    /* The client takes the whole first row; the buttons sit over its right end */
+    .app-table tbody td.cell-client {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        padding-right: 5.5rem;
+    }
+
+    .app-table tbody td.cell-actions {
+        grid-column: 2;
+        justify-self: end;
+    }
+
+    /* Tapping the client name already opens the detail */
+    .row-actions [data-action="view"] {
+        display: none;
+    }
+
+    .app-card-footer {
+        padding: 0.85rem 1rem;
+    }
+}

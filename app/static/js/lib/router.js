@@ -8,11 +8,16 @@ const DEFAULT_VIEW = "dashboard";
 const APP_NAME = "Registro de Créditos";
 export const VIEW_SHOWN = "view:shown";
 
+// Views the server did not render (the role cannot use them) fall back to the default one
+const isAvailable = name => document.querySelector(`.app-view[data-view="${name}"]`) !== null;
+
 const viewFromHash = () =>
-    Object.keys(VIEWS).find(name => VIEWS[name].hash === window.location.hash) ?? DEFAULT_VIEW;
+    Object.keys(VIEWS).find(name => VIEWS[name].hash === window.location.hash && isAvailable(name)) ?? DEFAULT_VIEW;
 
 function showView(name, { focus }) {
     const view = VIEWS[name];
+    // Unknown or unavailable addresses show the default view, so the address bar should say so too
+    if (window.location.hash !== view.hash) history.replaceState(null, "", view.hash);
     document.querySelectorAll(".app-view").forEach(section => {
         section.hidden = section.dataset.view !== name;
     });
@@ -25,7 +30,8 @@ function showView(name, { focus }) {
 
     document.getElementById("view-title").textContent = view.title;
     document.getElementById("view-eyebrow").textContent = view.eyebrow;
-    document.getElementById("topbar-new").hidden = name === "register";
+    const newButton = document.getElementById("topbar-new");
+    if (newButton) newButton.hidden = name === "register";
     document.title = `${view.title} · ${APP_NAME}`;
 
     // On small screens the sidebar is an offcanvas; close it after choosing a view

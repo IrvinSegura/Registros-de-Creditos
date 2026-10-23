@@ -1,6 +1,7 @@
 """Configuration classes selected through the APP_ENV environment variable."""
 
 import os
+from datetime import timedelta
 
 DEFAULT_SECRET_KEY = "dev-only-change-me"
 
@@ -17,6 +18,12 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
     TESTING = False
+
+    # Signed session cookie: unreadable from JavaScript, not sent on cross-site requests, valid for a work day
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = False
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
 
     # Cross-origin access is disabled unless origins are listed explicitly
     CORS_ORIGINS = _split_csv(os.getenv("CORS_ORIGINS", ""))
@@ -44,6 +51,8 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     ENV_NAME = "production"
+    # Production is served over HTTPS only
+    SESSION_COOKIE_SECURE = True
 
 
 CONFIGS: dict[str, type[BaseConfig]] = {

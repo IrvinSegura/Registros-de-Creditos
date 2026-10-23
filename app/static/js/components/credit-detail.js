@@ -1,8 +1,8 @@
-import { creditsApi, userMessage } from "../api.js";
-import { onCreditsChanged } from "../events.js";
-import { formatCurrency, formatDate, formatDateTime, formatMonths, formatPercent, initials } from "../format.js";
-import { notifyError } from "../notify.js";
-import { deleteCredit } from "./credits.js";
+import { creditsApi, userMessage } from "../lib/api.js";
+import { deleteCredit } from "../lib/credit-actions.js";
+import { onCreditsChanged } from "../lib/events.js";
+import { formatCurrency, formatDate, formatDateTime, formatMonths, formatPercent, initials } from "../lib/format.js";
+import { notifyError } from "../lib/notify.js";
 
 // Field names and value formats shown in the change history
 const FIELD_LABELS = {
@@ -74,8 +74,9 @@ export function initCreditDetail({ onEdit }) {
         element("detail-history-list").replaceChildren(...entries.map(buildHistoryItem));
     }
 
-    element("detail-edit").addEventListener("click", () => credit && onEdit(credit.id));
-    element("detail-delete").addEventListener("click", async () => {
+    // The buttons are only rendered for roles that may edit or delete
+    element("detail-edit")?.addEventListener("click", () => credit && onEdit?.(credit.id));
+    element("detail-delete")?.addEventListener("click", async () => {
         if (credit && await deleteCredit(credit.id, credit.client_name)) panel.hide();
     });
 
@@ -120,7 +121,10 @@ function buildHistoryItem(entry) {
     title.textContent = created ? "Crédito registrado" : "Crédito actualizado";
     const date = document.createElement("p");
     date.className = "timeline-date";
-    date.textContent = formatDateTime(entry.changed_at);
+    // Entries recorded before sign-in existed have no author
+    date.textContent = entry.changed_by
+        ? `${formatDateTime(entry.changed_at)} · por ${entry.changed_by}`
+        : formatDateTime(entry.changed_at);
     content.append(title, date);
 
     // Creations list the original values; updates list what changed

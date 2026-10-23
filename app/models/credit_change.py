@@ -8,6 +8,7 @@ from app.extensions import db
 
 if TYPE_CHECKING:
     from app.models.credit import Credit
+    from app.models.user import User
 
 
 class CreditChange(db.Model):
@@ -22,5 +23,8 @@ class CreditChange(db.Model):
     # {field: {"old": value, "new": value}}, values stored as JSON-friendly strings
     changes: Mapped[dict[str, Any]] = mapped_column(JSON)
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Who made the change; empty for entries recorded before sign-in existed or whose user was removed
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
 
     credit: Mapped["Credit"] = relationship(back_populates="changes")
+    user: Mapped["User | None"] = relationship()

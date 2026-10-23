@@ -1,10 +1,10 @@
-import { creditsApi, userMessage } from "../api.js";
-import { notifyCreditsChanged } from "../events.js";
-import { formatDate } from "../format.js";
+import { creditsApi, userMessage } from "../lib/api.js";
+import { notifyCreditsChanged } from "../lib/events.js";
+import { formatDate } from "../lib/format.js";
 import {
     clearValidation, fillCreditForm, handleFormError, readCreditForm, validateField, validateForm, withBusyButton,
-} from "../forms.js";
-import { notifyError, notifySuccess } from "../notify.js";
+} from "../lib/forms.js";
+import { notifyError, notifySuccess } from "../lib/notify.js";
 
 export function initEditModal() {
     const modalElement = document.getElementById("edit-credit-modal");

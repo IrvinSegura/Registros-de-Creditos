@@ -1,0 +1,110 @@
+/* Register view: payment simulation */
+.quote-card {
+    position: sticky;
+    top: 5.5rem;
+}
+
+.quote-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--bs-secondary-color);
+}
+
+.quote-empty .bi {
+    font-size: 2rem;
+    color: var(--app-primary);
+}
+
+.quote-label {
+    margin-bottom: 0.15rem;
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+}
+
+.quote-value {
+    margin-bottom: 0.15rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--app-primary);
+}
+
+.quote-hint {
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+}
+
+.quote-split {
+    display: flex;
+    height: 0.6rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--app-surface-muted);
+}
+
+.quote-split-principal {
+    background: var(--app-primary);
+    transition: width 0.3s ease;
+}
+
+.quote-split-interest {
+    background: var(--app-interest);
+    transition: width 0.3s ease;
+}
+
+.quote-list {
+    margin: 0 0 1rem;
+}
+
+.quote-list > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.quote-list dt {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 400;
+    color: var(--bs-secondary-color);
+}
+
+.quote-list dd {
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-list .quote-total {
+    border-bottom: 0;
+}
+
+.quote-list .quote-total dt {
+    color: var(--bs-body-color);
+    font-weight: 600;
+}
+
+.dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+}
+
+.dot-principal { background: var(--app-primary); }
+.dot-interest { background: var(--app-interest); }
+
+@media (max-width: 991.98px) {
+    .quote-card {
+        position: static;
+    }
+}

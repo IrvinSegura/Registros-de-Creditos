@@ -1,5 +1,9 @@
 // Thin client for the credits REST API
+import { redirectToLogin } from "./session.js";
+
 const BASE_URL = "/api/v1/credits";
+// Every state-changing request carries the session's CSRF token (see app/security.py)
+const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
 
 export class ApiError extends Error {
     constructor(message, status, fieldErrors = {}) {
@@ -10,8 +14,16 @@ export class ApiError extends Error {
 }
 
 async function request(url, options = {}) {
-    const response = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
+    const response = await fetch(url, {
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": CSRF_TOKEN },
+        ...options,
+    });
     if (response.status === 204) return null;
+    if (response.status === 401) {
+        // The session expired: sign in again and come back to the same view
+        redirectToLogin();
+        throw new ApiError("Tu sesión expiró. Inicia sesión de nuevo.", 401);
+    }
 
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {

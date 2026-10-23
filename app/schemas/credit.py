@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from marshmallow import Schema, ValidationError, fields, pre_load, validate, validates_schema
 
+CENT = Decimal("0.01")
+
 # Letters (accents and ñ included) and spaces, starting with an uppercase letter
 CLIENT_NAME_REGEX = r"^[A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]*$"
 MIN_ISSUE_DATE = date(2000, 1, 1)
@@ -15,21 +17,41 @@ NUMBER_MESSAGES = {**REQUIRED_MESSAGES, "invalid": "Debe ser un número válido.
 DATE_MESSAGES = {**REQUIRED_MESSAGES, "invalid": "Debe ser una fecha válida (AAAA-MM-DD)."}
 
 
+class CentsDecimal(fields.Decimal):
+    """Decimal with at most two places: extra places are rejected instead of silently rounded."""
+
+    default_error_messages = {"places": "Usa como máximo 2 decimales."}
+
+    def __init__(self, **kwargs):
+        super().__init__(places=2, as_string=True, **kwargs)
+
+    def _format_num(self, value):
+        number = Decimal(str(value))
+        # 1.500 is fine, 1.505 is not
+        if number.is_finite() and number != number.quantize(CENT):
+            raise self.make_error("places")
+        return super()._format_num(value)
+
+
+def not_in_future(value: date) -> None:
+    # Checked on each request, so "today" never goes stale
+    if value > date.today():
+        raise ValidationError("La fecha no puede ser posterior a hoy.")
+
+
 # Field factories shared by the credit payload and the quote query
-def amount_field(**kwargs) -> fields.Decimal:
-    return fields.Decimal(
-        places=2,
-        as_string=True,
+def amount_field(**kwargs) -> CentsDecimal:
+    return CentsDecimal(
         error_messages=NUMBER_MESSAGES,
-        validate=validate.Range(min=Decimal("0.01"), max=MAX_AMOUNT, error="El monto debe ser mayor a 0."),
+        validate=validate.Range(
+            min=CENT, max=MAX_AMOUNT, error="El monto debe ser mayor a 0 y como máximo 999,999,999,999.99."
+        ),
         **kwargs,
     )
 
 
-def interest_rate_field(**kwargs) -> fields.Decimal:
-    return fields.Decimal(
-        places=2,
-        as_string=True,
+def interest_rate_field(**kwargs) -> CentsDecimal:
+    return CentsDecimal(
         error_messages=NUMBER_MESSAGES,
         validate=validate.Range(min=0, min_inclusive=False, max=100, error="La tasa debe ser mayor a 0 y como máximo 100."),
         metadata={"description": "Annual interest rate, as a percentage."},
@@ -64,7 +86,10 @@ class CreditSchema(Schema):
     issue_date = fields.Date(
         required=True,
         error_messages=DATE_MESSAGES,
-        validate=validate.Range(min=MIN_ISSUE_DATE, error="La fecha debe ser posterior al 01/01/2000."),
+        validate=[
+            validate.Range(min=MIN_ISSUE_DATE, error="La fecha debe ser posterior al 01/01/2000."),
+            not_in_future,
+        ],
     )
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
@@ -181,3 +206,7 @@ class CreditChangeSchema(Schema):
     action = fields.String(metadata={"description": "created or updated."})
     changes = fields.Dict(metadata={"description": "{field: {old, new}} with values as strings."})
     changed_at = fields.DateTime()
+    changed_by = fields.Function(
+        lambda change: change.user.full_name if change.user else None,
+        metadata={"description": "Name of the user who made the change, or null when unknown."},
+    )

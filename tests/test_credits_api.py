@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import pytest
 
 URL = "/api/v1/credits"
@@ -28,13 +30,16 @@ def test_create_credit_normalizes_client_name_spaces(create_credit):
         ("client_name", "Jo"),
         ("amount", 0),
         ("amount", "abc"),
+        ("amount", "10.005"),
         ("interest_rate", 0),
+        ("interest_rate", "10.555"),
         ("interest_rate", 100.01),
         ("term_months", 0),
         ("term_months", 361),
         ("term_months", "12"),
         ("issue_date", "1999-12-31"),
         ("issue_date", "31/12/2026"),
+        ("issue_date", (date.today() + timedelta(days=1)).isoformat()),
     ],
 )
 def test_create_credit_rejects_invalid_data(client, valid_credit, field, value):
@@ -42,6 +47,23 @@ def test_create_credit_rejects_invalid_data(client, valid_credit, field, value):
 
     assert response.status_code == 422
     assert field in response.get_json()["errors"]["json"]
+
+
+def test_create_credit_explains_each_rule(client, valid_credit):
+    too_large = client.post(URL, json={**valid_credit, "amount": "1000000000000"}).get_json()["errors"]["json"]
+    extra_places = client.post(URL, json={**valid_credit, "amount": "10.005"}).get_json()["errors"]["json"]
+    future = client.post(URL, json={**valid_credit, "issue_date": "2999-01-01"}).get_json()["errors"]["json"]
+
+    assert too_large["amount"] == ["El monto debe ser mayor a 0 y como máximo 999,999,999,999.99."]
+    assert extra_places["amount"] == ["Usa como máximo 2 decimales."]
+    assert future["issue_date"] == ["La fecha no puede ser posterior a hoy."]
+
+
+def test_create_credit_accepts_trailing_zeros_and_today(create_credit):
+    created = create_credit(amount="1500.500", interest_rate="9.50", issue_date=date.today().isoformat())
+
+    assert created["amount"] == "1500.50"
+    assert created["interest_rate"] == "9.50"
 
 
 def test_create_credit_requires_every_field(client):

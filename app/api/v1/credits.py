@@ -4,8 +4,10 @@ from datetime import date
 
 from flask import Response
 from flask.views import MethodView
+from flask_login import current_user
 from flask_smorest import Blueprint
 
+from app.auth.permissions import CREATE_CREDITS, DELETE_CREDITS, UPDATE_CREDITS, require_permission
 from app.schemas import (
     AmortizationSchema,
     CreditChangeSchema,
@@ -20,7 +22,15 @@ from app.schemas import (
 )
 from app.services import credit_service
 
-blp = Blueprint("credits", __name__, url_prefix="/api/v1/credits", description="Credit registration and lookup.")
+blp = Blueprint(
+    "credits",
+    __name__,
+    url_prefix="/api/v1/credits",
+    description=(
+        "Credit registration and lookup. Every endpoint requires a signed-in session; "
+        "state-changing requests also need the X-CSRF-Token header."
+    ),
+)
 
 
 @blp.route("")
@@ -35,11 +45,14 @@ class CreditsResource(MethodView):
             "meta": {"page": page.page, "per_page": page.per_page, "total": page.total, "pages": page.pages},
         }
 
+    # Permission checks go first, so a read-only user gets 403 before the body is validated
+    @require_permission(CREATE_CREDITS)
     @blp.arguments(CreditSchema)
     @blp.response(201, CreditSchema)
+    @blp.alt_response(403, response="FORBIDDEN")
     def post(self, data):
-        """Register a new credit."""
-        return credit_service.create_credit(data)
+        """Register a new credit. Requires the analyst or admin role."""
+        return credit_service.create_credit(data, user_id=current_user.id)
 
 
 @blp.route("/export")
@@ -82,17 +95,21 @@ class CreditResource(MethodView):
         """Get a credit by id."""
         return credit_service.get_credit(credit_id)
 
+    @require_permission(UPDATE_CREDITS)
     @blp.arguments(CreditSchema)
     @blp.response(200, CreditSchema)
+    @blp.alt_response(403, response="FORBIDDEN")
     @blp.alt_response(404, response="NOT_FOUND")
     def put(self, data, credit_id):
-        """Replace a credit's data."""
-        return credit_service.update_credit(credit_id, data)
+        """Replace a credit's data. Requires the analyst or admin role."""
+        return credit_service.update_credit(credit_id, data, user_id=current_user.id)
 
+    @require_permission(DELETE_CREDITS)
     @blp.response(204)
+    @blp.alt_response(403, response="FORBIDDEN")
     @blp.alt_response(404, response="NOT_FOUND")
     def delete(self, credit_id):
-        """Delete a credit and its history."""
+        """Delete a credit and its history. Requires the admin role."""
         credit_service.delete_credit(credit_id)
 
 

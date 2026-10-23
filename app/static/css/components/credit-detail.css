@@ -1,0 +1,182 @@
+/* Credit detail drawer: stats, amortization schedule and change history */
+.credit-detail {
+    --bs-offcanvas-width: min(100vw, 620px);
+    background: var(--app-surface);
+}
+
+.credit-detail .offcanvas-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.credit-detail .offcanvas-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-stats > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--app-border);
+    border-radius: 0.75rem;
+    background: var(--app-surface-muted);
+}
+
+.detail-stats span {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+}
+
+.detail-stats strong {
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-stats .detail-stat-highlight {
+    border-color: rgba(var(--app-primary-rgb), 0.35);
+    background: var(--bs-primary-bg-subtle);
+}
+
+.detail-stats .detail-stat-highlight strong {
+    color: var(--app-primary);
+}
+
+.detail-tabs {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.detail-tabs .nav-link {
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+}
+
+.detail-tabs .nav-link.active {
+    color: var(--app-primary);
+    border-bottom-color: var(--app-primary);
+}
+
+.schedule-wrapper {
+    max-height: 26rem;
+    overflow: auto;
+    border: 1px solid var(--app-border);
+    border-radius: 0.75rem;
+}
+
+.schedule-table {
+    --bs-table-bg: transparent;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.schedule-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--app-surface-muted);
+    color: var(--bs-secondary-color);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.schedule-table td,
+.schedule-table th {
+    padding: 0.5rem 0.75rem;
+    border-color: var(--app-border);
+}
+
+.credit-detail-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--app-border);
+}
+
+/* History timeline */
+.timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    gap: 0.9rem;
+    padding-bottom: 1.25rem;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 2.1rem;
+    bottom: 0;
+    left: 1rem;
+    width: 2px;
+    background: var(--app-border);
+}
+
+.timeline-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--app-primary);
+}
+
+.timeline-icon-created {
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--app-chart-3);
+}
+
+.timeline-title {
+    margin-bottom: 0.1rem;
+    font-weight: 600;
+}
+
+.timeline-date {
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+}
+
+.timeline-changes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.85rem;
+}
+
+.timeline-changes li {
+    padding: 0.15rem 0;
+}
+
+.timeline-changes .old-value {
+    color: var(--bs-secondary-color);
+    text-decoration: line-through;
+}
+
+.timeline-changes .new-value {
+    font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+    .detail-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

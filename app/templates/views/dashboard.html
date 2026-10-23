@@ -99,6 +99,10 @@
 <div class="card app-card empty-state" id="dashboard-empty" hidden>
     <span class="empty-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
     <p class="fw-semibold mb-1">Sin créditos en este periodo</p>
+    {% if can("credits:create") %}
     <p class="text-body-secondary mb-3">Cambia el periodo o registra un crédito para ver las estadísticas.</p>
     <a href="#/nuevo" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar crédito</a>
+    {% else %}
+    <p class="text-body-secondary mb-0">Cambia el periodo para ver las estadísticas.</p>
+    {% endif %}
 </div>

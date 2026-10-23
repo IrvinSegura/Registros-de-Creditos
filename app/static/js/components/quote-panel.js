@@ -1,51 +1,13 @@
-import { creditsApi } from "../api.js";
-import { notifyCreditsChanged } from "../events.js";
-import { formatCurrency, formatMonths, formatPercent, todayIso } from "../format.js";
-import {
-    clearValidation, handleFormError, isValidValue, readCreditForm, validateField, validateForm, withBusyButton,
-} from "../forms.js";
-import { notifySuccess } from "../notify.js";
+import { creditsApi } from "../lib/api.js";
+import { formatCurrency, formatMonths, formatPercent } from "../lib/format.js";
+import { isValidValue } from "../lib/forms.js";
 
 const QUOTE_DELAY_MS = 300;
-const QUOTE_FIELDS = ["amount", "interest_rate", "term_months"];
-
-export function initRegisterForm() {
-    const form = document.getElementById("credit-form");
-    const submitButton = form.querySelector("button[type='submit']");
-    const quote = createQuotePanel(form);
-    const setDefaultDate = () => { form.elements.issue_date.value = todayIso(); };
-
-    form.addEventListener("input", event => {
-        validateField(event.target);
-        if (QUOTE_FIELDS.includes(event.target.name)) quote.schedule();
-    });
-    form.addEventListener("reset", () => {
-        clearValidation(form);
-        // The reset event fires before the fields are cleared
-        setTimeout(() => { setDefaultDate(); quote.schedule(); });
-    });
-
-    form.addEventListener("submit", async event => {
-        event.preventDefault();
-        if (!validateForm(form)) return;
-
-        await withBusyButton(submitButton, async () => {
-            try {
-                await creditsApi.create(readCreditForm(form));
-                form.reset();
-                notifySuccess("Crédito registrado");
-                notifyCreditsChanged();
-            } catch (error) {
-                handleFormError(form, error);
-            }
-        });
-    });
-
-    setDefaultDate();
-}
+// Form fields the estimate depends on
+export const QUOTE_FIELDS = ["amount", "interest_rate", "term_months"];
 
 // Live estimate of the monthly payment, computed by the API so it matches the schedule exactly
-function createQuotePanel(form) {
+export function createQuotePanel(form) {
     const element = id => document.getElementById(id);
     const empty = element("quote-empty");
     const result = element("quote-result");
