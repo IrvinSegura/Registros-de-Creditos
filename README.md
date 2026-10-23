@@ -53,8 +53,8 @@ flask db upgrade
 # Crear el primer usuario (pide el nombre y la contraseña)
 flask users create admin --role admin
 
-# Ejecutar la aplicación
-flask run
+# Ejecutar la aplicación en desarrollo (--debug recarga el código al guardar)
+flask run --debug
 
 # Acceder a la aplicación en el navegador
 http://127.0.0.1:5000/
@@ -67,6 +67,19 @@ http://127.0.0.1:5000/
 | `SECRET_KEY` | Clave secreta de Flask (obligatoria en producción) | solo para desarrollo |
 | `DATABASE_URL` | URL de la base de datos (las rutas SQLite relativas se crean en `instance/`) | `sqlite:///credits.db` |
 | `CORS_ORIGINS` | Orígenes permitidos para llamar a `/api/*` desde otro dominio, separados por comas | vacío (ninguno) |
+| `HOST`, `PORT`, `THREADS` | Dirección, puerto e hilos del servidor de producción (`serve.py`) | `127.0.0.1`, `8000`, `8` |
+| `TRUSTED_PROXY` | IP del proxy inverso que atiende HTTPS, para confiar en sus cabeceras `X-Forwarded-*` | vacío (ninguno) |
+
+### 4️⃣ Producción
+El servidor de desarrollo de Flask no es para producción. La aplicación incluye `serve.py`, que usa **Waitress** (funciona en Windows y Linux):
+
+```sh
+# En .env: APP_ENV=production y una SECRET_KEY larga y aleatoria
+flask db upgrade
+python serve.py
+```
+
+En producción la cookie de sesión solo viaja por HTTPS, así que la aplicación debe quedar detrás de un proxy inverso con certificado (IIS, nginx, Caddy...). Indica la IP de ese proxy en `TRUSTED_PROXY`; si no, no podrás iniciar sesión por HTTP.
 
 ## 👥 Usuarios y roles
 Toda la aplicación y la API requieren iniciar sesión. Las cuentas se administran desde la terminal:
@@ -74,7 +87,8 @@ Toda la aplicación y la API requieren iniciar sesión. Las cuentas se administr
 ```sh
 flask users create <usuario> --role analyst   # admin | analyst | viewer
 flask users list
-flask users set-password <usuario>            # también desbloquea la cuenta
+flask users set-password <usuario>            # también desbloquea la cuenta y cierra sus sesiones
+flask users end-sessions <usuario>            # cierra sus sesiones sin cambiar la contraseña
 flask users deactivate <usuario>              # cierra sus sesiones abiertas
 flask users activate <usuario>
 ```
@@ -88,6 +102,8 @@ flask users activate <usuario>
 - Las contraseñas se guardan con hash (scrypt) y deben tener al menos 10 caracteres.
 - Tras 5 intentos fallidos la cuenta se bloquea 15 minutos.
 - La sesión dura 8 horas; la cookie es `HttpOnly`, `SameSite=Lax` y, en producción, `Secure`.
+- Cambiar la contraseña, cerrar las sesiones o desactivar la cuenta saca al usuario de todos los navegadores donde tenga sesión abierta.
+- Las páginas y respuestas de la API no se guardan en la caché del navegador (`Cache-Control: no-store`).
 
 ## 🗂 Estructura del proyecto
 ```
@@ -166,6 +182,8 @@ pytest
 flask db migrate -m "descripción del cambio"
 flask db upgrade
 ```
+
+La aplicación activa las llaves foráneas de SQLite en cada conexión, así que la base rechaza datos huérfanos. Durante las migraciones se desactivan, porque Alembic reconstruye las tablas de SQLite y, con las llaves activas, borraría en cascada el historial de los créditos.
 <br>
 
 ![image](https://github.com/user-attachments/assets/05947930-722f-47b2-b8eb-c0b8cbf3e715)
