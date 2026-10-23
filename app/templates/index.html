@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "app.html" %}
 
 {% block content %}
 {# Each view is shown by the client-side router (static/js/lib/router.js) based on the URL hash #}
@@ -8,12 +8,16 @@
 <section class="app-view" data-view="credits" hidden>
     {% include "views/credits.html" %}
 </section>
+{% if can("credits:create") %}
 <section class="app-view" data-view="register" hidden>
     {% include "views/register.html" %}
 </section>
+{% endif %}
 {% endblock %}
 
 {% block overlays %}
 {% include "components/credit-detail.html" %}
+{% if can("credits:update") %}
 {% include "components/edit-modal.html" %}
+{% endif %}
 {% endblock %}
