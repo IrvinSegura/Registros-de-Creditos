@@ -1,8 +1,8 @@
-import { creditsApi, userMessage } from "../api.js";
-import { onCreditsChanged } from "../events.js";
-import { formatCurrency, formatDate, formatDateTime, formatMonths, formatPercent, initials } from "../format.js";
-import { notifyError } from "../notify.js";
-import { deleteCredit } from "./credits.js";
+import { creditsApi, userMessage } from "../lib/api.js";
+import { deleteCredit } from "../lib/credit-actions.js";
+import { onCreditsChanged } from "../lib/events.js";
+import { formatCurrency, formatDate, formatDateTime, formatMonths, formatPercent, initials } from "../lib/format.js";
+import { notifyError } from "../lib/notify.js";
 
 // Field names and value formats shown in the change history
 const FIELD_LABELS = {
