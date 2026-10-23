@@ -5,5 +5,6 @@ Flask-Migrate==4.1.0
 alembic==1.20.1
 flask-smorest==0.47.0
 flask-cors==6.0.5
+Flask-Login==0.6.3
 marshmallow==4.3.1
 python-dotenv==1.2.4
