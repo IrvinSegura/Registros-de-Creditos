@@ -60,12 +60,18 @@
         </div>
     </div>
 
+    {% if can("credits:update") or can("credits:delete") %}
     <div class="credit-detail-footer">
+        {% if can("credits:delete") %}
         <button type="button" class="btn btn-outline-danger" id="detail-delete">
             <i class="bi bi-trash3" aria-hidden="true"></i> Eliminar
         </button>
-        <button type="button" class="btn btn-primary" id="detail-edit">
+        {% endif %}
+        {% if can("credits:update") %}
+        <button type="button" class="btn btn-primary ms-auto" id="detail-edit">
             <i class="bi bi-pencil" aria-hidden="true"></i> Editar
         </button>
+        {% endif %}
     </div>
+    {% endif %}
 </div>

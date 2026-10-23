@@ -1,5 +1,6 @@
 // Rows of the credits table, built with textContent so user data is never parsed as HTML
 import { formatCurrency, formatDate, formatMonths, formatPercent, initials } from "../lib/format.js";
+import { can, PERMISSIONS } from "../lib/session.js";
 
 const COLUMNS = 6;
 
@@ -38,9 +39,17 @@ export function buildCreditRow(credit) {
     actionGroup.className = "row-actions";
     actionGroup.append(
         actionButton("view", "btn-outline-secondary", "bi-eye", `Ver detalle del crédito de ${credit.client_name}`, credit),
-        actionButton("edit", "btn-outline-primary", "bi-pencil", `Editar crédito de ${credit.client_name}`, credit),
-        actionButton("delete", "btn-outline-danger", "bi-trash3", `Eliminar crédito de ${credit.client_name}`, credit),
     );
+    if (can(PERMISSIONS.update)) {
+        actionGroup.append(
+            actionButton("edit", "btn-outline-primary", "bi-pencil", `Editar crédito de ${credit.client_name}`, credit),
+        );
+    }
+    if (can(PERMISSIONS.delete)) {
+        actionGroup.append(
+            actionButton("delete", "btn-outline-danger", "bi-trash3", `Eliminar crédito de ${credit.client_name}`, credit),
+        );
+    }
     actions.appendChild(actionGroup);
 
     row.append(

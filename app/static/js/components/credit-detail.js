@@ -74,8 +74,9 @@ export function initCreditDetail({ onEdit }) {
         element("detail-history-list").replaceChildren(...entries.map(buildHistoryItem));
     }
 
-    element("detail-edit").addEventListener("click", () => credit && onEdit(credit.id));
-    element("detail-delete").addEventListener("click", async () => {
+    // The buttons are only rendered for roles that may edit or delete
+    element("detail-edit")?.addEventListener("click", () => credit && onEdit?.(credit.id));
+    element("detail-delete")?.addEventListener("click", async () => {
         if (credit && await deleteCredit(credit.id, credit.client_name)) panel.hide();
     });
 
@@ -120,7 +121,10 @@ function buildHistoryItem(entry) {
     title.textContent = created ? "Crédito registrado" : "Crédito actualizado";
     const date = document.createElement("p");
     date.className = "timeline-date";
-    date.textContent = formatDateTime(entry.changed_at);
+    // Entries recorded before sign-in existed have no author
+    date.textContent = entry.changed_by
+        ? `${formatDateTime(entry.changed_at)} · por ${entry.changed_by}`
+        : formatDateTime(entry.changed_at);
     content.append(title, date);
 
     // Creations list the original values; updates list what changed
