@@ -69,9 +69,11 @@
         <span class="empty-icon" aria-hidden="true"><i class="bi bi-inbox"></i></span>
         <p class="fw-semibold mb-1" id="credits-empty-title"></p>
         <p class="text-body-secondary mb-3" id="credits-empty-text"></p>
+        {% if can("credits:create") %}
         <a href="#/nuevo" class="btn btn-primary btn-sm" id="credits-empty-action">
             <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar crédito
         </a>
+        {% endif %}
     </div>
 
     <div class="card-footer app-card-footer d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
