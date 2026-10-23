@@ -32,6 +32,15 @@ def test_cdn_assets_carry_integrity_hashes(client):
     assert all('integrity="sha384-' in tag and 'crossorigin="anonymous"' in tag for tag in cdn_tags)
 
 
+def test_api_docs_send_the_csrf_token_on_requests(client):
+    html = client.get("/api/docs").get_data(as_text=True)
+    with client.session_transaction() as session:
+        token = session["csrf_token"]
+
+    assert "requestInterceptor" in html
+    assert f'const csrfToken = "{token}";' in html
+
+
 def test_api_docs_get_their_own_policy(client):
     policy = client.get("/api/docs").headers["Content-Security-Policy"]
 
