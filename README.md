@@ -79,17 +79,19 @@ app/
 │   ├── base.html      # Layout: menú lateral, barra superior, tema y librerías
 │   ├── index.html     # Vistas de la aplicación
 │   ├── macros/        # Campos de formulario compartidos
-│   └── partials/      # Un archivo por vista o panel: dashboard, credits, register, credit-detail, edit-modal
-└── static/
-    ├── css/app.css    # Estilos y variables de diseño (tema claro y oscuro)
+│   ├── views/         # Una plantilla por vista: dashboard, credits, register
+│   └── components/    # Paneles compartidos: credit-detail, edit-modal
+└── static/            # css/ y js/ siguen la misma organización que templates/
     ├── img/           # Favicon
+    ├── css/
+    │   ├── base.css   # Variables de diseño (tema claro y oscuro), menú, tarjetas, formularios y botones
+    │   ├── views/     # Estilos de cada vista
+    │   └── components/
     └── js/
-        ├── main.js    # Punto de entrada que conecta los módulos
-        ├── router.js  # Navegación entre vistas (#/panel, #/creditos, #/nuevo)
-        ├── api.js     # Cliente de la API REST
-        ├── forms.js   # Validación y lectura de formularios
-        ├── format.js  # Formato de moneda, fechas y porcentajes (es-MX)
-        └── modules/   # dashboard, credits, register, credit-detail y edit-modal
+        ├── main.js    # Punto de entrada que conecta las vistas y los componentes
+        ├── lib/       # API, enrutador, formularios, formato (es-MX), avisos, tema y acciones de crédito
+        ├── views/     # dashboard, credits, register
+        └── components/ # credit-detail, edit-modal, credit-rows, quote-panel, portfolio-charts
 migrations/            # Migraciones de base de datos (Alembic)
 tests/                 # Pruebas con pytest
 wsgi.py                # Punto de entrada
