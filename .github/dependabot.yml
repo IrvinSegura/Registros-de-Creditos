@@ -1,0 +1,16 @@
+# Weekly pull requests that update pinned dependencies, including the ones with known vulnerabilities
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    # Related updates arrive together instead of one pull request per package
+    groups:
+      python:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

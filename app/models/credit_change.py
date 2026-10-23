@@ -18,7 +18,7 @@ class CreditChange(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     credit_id: Mapped[int] = mapped_column(ForeignKey("credits.id", ondelete="CASCADE"), index=True)
-    # "created" or "updated"
+    # One of app.services.credit_service.HISTORY_ACTIONS
     action: Mapped[str] = mapped_column(String(20))
     # {field: {"old": value, "new": value}}, values stored as JSON-friendly strings
     changes: Mapped[dict[str, Any]] = mapped_column(JSON)
