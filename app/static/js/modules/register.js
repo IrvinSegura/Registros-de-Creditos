@@ -2,7 +2,7 @@ import { creditsApi } from "../api.js";
 import { notifyCreditsChanged } from "../events.js";
 import { formatCurrency, formatMonths, formatPercent, todayIso } from "../format.js";
 import {
-    clearValidation, handleFormError, isValidValue, readCreditForm, validateField, validateForm, withBusyButton,
+    clearValidation, handleFormError, isValidValue, limitIssueDate, readCreditForm, validateField, validateForm, withBusyButton,
 } from "../forms.js";
 import { notifySuccess } from "../notify.js";
 
@@ -13,7 +13,10 @@ export function initRegisterForm() {
     const form = document.getElementById("credit-form");
     const submitButton = form.querySelector("button[type='submit']");
     const quote = createQuotePanel(form);
-    const setDefaultDate = () => { form.elements.issue_date.value = todayIso(); };
+    const setDefaultDate = () => {
+        limitIssueDate(form);
+        form.elements.issue_date.value = todayIso();
+    };
 
     form.addEventListener("input", event => {
         validateField(event.target);

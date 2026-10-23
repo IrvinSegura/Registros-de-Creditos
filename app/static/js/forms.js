@@ -1,16 +1,30 @@
 import { userMessage } from "./api.js";
+import { todayIso } from "./format.js";
 import { notifyError } from "./notify.js";
+
+const MAX_AMOUNT = 999999999999.99;
+// Plain decimal with at most two significant places (1.500 is fine, 1.505 is not)
+const CENTS = /^\d+(\.\d{0,2}0*)?$/;
+const PLACES_MESSAGE = "Usa como máximo 2 decimales.";
+
+function checkDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value < "2000-01-01") return "Ingresa una fecha válida posterior al 01/01/2000.";
+    return value <= todayIso() || "La fecha no puede ser posterior a hoy.";
+}
+
+function checkCents(value, min, max, rangeMessage) {
+    if (!/^\d+(\.\d*)?$/.test(value)) return "Debe ser un número válido.";
+    if (!CENTS.test(value)) return PLACES_MESSAGE;
+    return (Number(value) >= min && Number(value) <= max) || rangeMessage;
+}
 
 // Same rules as the API; messages are shown to the user, so they stay in Spanish
 const VALIDATORS = {
     client_name: value => /^[A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,99}$/.test(value)
         || "Debe empezar con mayúscula y contener solo letras y espacios (3 a 100 caracteres).",
-    issue_date: value => (/^\d{4}-\d{2}-\d{2}$/.test(value) && value >= "2000-01-01")
-        || "Ingresa una fecha válida posterior al 01/01/2000.",
-    amount: value => (value !== "" && Number(value) > 0 && Number(value) < 1e12)
-        || "El monto debe ser mayor a 0.",
-    interest_rate: value => (value !== "" && Number(value) > 0 && Number(value) <= 100)
-        || "La tasa debe ser mayor a 0 y como máximo 100.",
+    issue_date: checkDate,
+    amount: value => checkCents(value, 0.01, MAX_AMOUNT, "El monto debe ser mayor a 0 y como máximo 999,999,999,999.99."),
+    interest_rate: value => checkCents(value, 0.01, 100, "La tasa debe ser mayor a 0 y como máximo 100."),
     term_months: value => (/^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 360)
         || "El plazo debe ser un número entero entre 1 y 360 meses.",
 };
@@ -58,6 +72,12 @@ export function readCreditForm(form) {
 
 export function fillCreditForm(form, credit) {
     validatedFields(form).forEach(input => { input.value = credit[input.name] ?? ""; });
+    limitIssueDate(form);
+}
+
+// The date picker cannot go past today, matching the API rule
+export function limitIssueDate(form) {
+    form.elements.issue_date.max = todayIso();
 }
 
 // Shows API validation errors next to their fields, or a dialog for anything else
