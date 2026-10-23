@@ -13,6 +13,7 @@ export function initEditModal() {
     const submitButton = form.querySelector("button[type='submit']");
     const subtitle = document.getElementById("edit-credit-subtitle");
     let creditId = null;
+    let version = null;
     let initialValues = "";
 
     const snapshot = () => JSON.stringify(readCreditForm(form));
@@ -29,12 +30,19 @@ export function initEditModal() {
 
         await withBusyButton(submitButton, async () => {
             try {
-                await creditsApi.update(creditId, readCreditForm(form));
+                await creditsApi.update(creditId, readCreditForm(form), version);
                 modal.hide();
                 notifySuccess("Crédito actualizado");
                 notifyCreditsChanged();
             } catch (error) {
-                handleFormError(form, error);
+                if (error.status !== 412) {
+                    handleFormError(form, error);
+                    return;
+                }
+                // Someone saved the credit meanwhile: show what they saved instead of overwriting it
+                modal.hide();
+                notifyCreditsChanged();
+                notifyError(userMessage(error), "El crédito cambió");
             }
         });
         submitButton.disabled = snapshot() === initialValues;
@@ -48,6 +56,7 @@ export function initEditModal() {
             try {
                 const credit = await creditsApi.get(id);
                 creditId = credit.id;
+                version = credit.version;
                 fillCreditForm(form, credit);
                 clearValidation(form);
                 initialValues = snapshot();

@@ -44,6 +44,13 @@
                 </a>
                 {% endif %}
 
+                {% if can("users:manage") %}
+                <p class="sidebar-section">Administración</p>
+                <a class="sidebar-link" href="#/usuarios" data-view-link="users">
+                    <i class="bi bi-people" aria-hidden="true"></i><span>Usuarios</span>
+                </a>
+                {% endif %}
+
                 <p class="sidebar-section">Recursos</p>
                 <a class="sidebar-link" href="/api/docs" target="_blank" rel="noopener">
                     <i class="bi bi-code-slash" aria-hidden="true"></i><span>Documentación API</span>
@@ -63,6 +70,10 @@
                         <span class="sidebar-user-name">{{ current_user.full_name }}</span>
                         <span class="sidebar-user-role">{{ role_label }}</span>
                     </div>
+                    <button type="button" class="sidebar-user-logout sidebar-user-account" id="account-password" title="Cambiar mi contraseña"
+                            aria-label="Cambiar mi contraseña">
+                        <i class="bi bi-key" aria-hidden="true"></i>
+                    </button>
                     <form method="post" action="{{ url_for('auth.logout') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="sidebar-user-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
