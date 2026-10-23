@@ -31,7 +31,8 @@ export function initCreditDetail({ onEdit }) {
         ]);
         credit = data;
         renderSummary(data, schedule);
-        renderSchedule(schedule.installments);
+        renderProgress(data);
+        renderSchedule(schedule.installments, data.standing);
         renderHistory(history);
     }
 
@@ -47,9 +48,31 @@ export function initCreditDetail({ onEdit }) {
         element("detail-total").textContent = formatCurrency(schedule.total_paid);
     }
 
-    function renderSchedule(installments) {
+    function renderProgress(data) {
+        const { standing } = data;
+        const completed = standing.status === "completed";
+        const status = element("detail-status");
+        status.textContent = completed ? "Concluido" : "Vigente";
+        status.className = `badge rounded-pill status-badge ${completed ? "status-completed" : "status-active"}`;
+
+        element("detail-progress-label").textContent = `${standing.installments_elapsed} de ${data.term_months} cuotas`;
+        const bar = element("detail-progress-bar");
+        bar.setAttribute("aria-valuemax", String(data.term_months));
+        bar.setAttribute("aria-valuenow", String(standing.installments_elapsed));
+        bar.classList.toggle("is-completed", completed);
+        element("detail-progress-fill").style.width = `${(standing.installments_elapsed / data.term_months) * 100}%`;
+        element("detail-outstanding").textContent = formatCurrency(standing.outstanding_balance);
+        element("detail-next").textContent = completed
+            ? "Sin cuotas pendientes"
+            : `${formatDate(standing.next_due_date)} · ${formatCurrency(standing.next_payment)}`;
+    }
+
+    // Elapsed installments are muted and the next one is highlighted
+    function renderSchedule(installments, standing) {
         const rows = installments.map(item => {
             const row = document.createElement("tr");
+            if (item.number <= standing.installments_elapsed) row.className = "is-elapsed";
+            if (item.number === standing.installments_elapsed + 1) row.className = "is-next";
             [
                 [item.number, ""],
                 [formatDate(item.due_date), ""],
@@ -66,6 +89,14 @@ export function initCreditDetail({ onEdit }) {
             return row;
         });
         element("detail-schedule-body").replaceChildren(...rows);
+    }
+
+    // Brings the next installment into view inside the scrollable schedule
+    function scrollToNextInstallment() {
+        const wrapper = element("detail-schedule-body").closest(".schedule-wrapper");
+        const next = wrapper.querySelector("tr.is-next");
+        const header = wrapper.querySelector("thead").offsetHeight;
+        wrapper.scrollTop = next ? next.offsetTop - header - next.offsetHeight : 0;
     }
 
     function renderHistory(entries) {
@@ -96,6 +127,7 @@ export function initCreditDetail({ onEdit }) {
                 await load(id);
                 bootstrap.Tab.getOrCreateInstance(element("detail-schedule-tab")).show();
                 panel.show();
+                scrollToNextInstallment();
             } catch (error) {
                 notifyError(userMessage(error), "No se pudo abrir el crédito");
             }

@@ -12,6 +12,6 @@ const editModal = can(PERMISSIONS.update) ? initEditModal() : null;
 const creditDetail = initCreditDetail({ onEdit: editModal?.open });
 if (can(PERMISSIONS.create)) initRegisterForm();
 initCredits({ onView: creditDetail.open, onEdit: editModal?.open });
-const dashboard = initDashboard();
+const dashboard = initDashboard({ onView: creditDetail.open });
 initThemeToggle(() => dashboard.refreshTheme());
 initRouter();
