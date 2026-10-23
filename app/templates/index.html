@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-{# Each view is shown by the client-side router (static/js/router.js) based on the URL hash #}
+{# Each view is shown by the client-side router (static/js/lib/router.js) based on the URL hash #}
 <section class="app-view" data-view="dashboard" hidden>
-    {% include "partials/dashboard.html" %}
+    {% include "views/dashboard.html" %}
 </section>
 <section class="app-view" data-view="credits" hidden>
-    {% include "partials/credits.html" %}
+    {% include "views/credits.html" %}
 </section>
 <section class="app-view" data-view="register" hidden>
-    {% include "partials/register.html" %}
+    {% include "views/register.html" %}
 </section>
 {% endblock %}
 
 {% block overlays %}
-{% include "partials/credit-detail.html" %}
-{% include "partials/edit-modal.html" %}
+{% include "components/credit-detail.html" %}
+{% include "components/edit-modal.html" %}
 {% endblock %}
