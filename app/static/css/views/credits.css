@@ -51,7 +51,7 @@
     color: var(--bs-secondary-color);
     background: var(--app-surface-muted);
     border-bottom: 1px solid var(--app-border);
-    padding: 0.7rem 1rem;
+    padding: 0.7rem 0.85rem;
     white-space: nowrap;
 }
 
@@ -95,7 +95,7 @@ th[aria-sort="descending"] .sort-btn::after {
 }
 
 .app-table tbody td {
-    padding: 0.8rem 1rem;
+    padding: 0.8rem 0.85rem;
     border-color: var(--app-border);
     white-space: nowrap;
 }
@@ -140,11 +140,38 @@ th[aria-sort="descending"] .sort-btn::after {
     text-decoration: underline;
 }
 
-.term-badge {
-    font-weight: 500;
+/* Installments elapsed out of the term */
+.term-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 6.5rem;
+}
+
+.term-progress-label {
+    font-size: 0.82rem;
+    color: var(--bs-secondary-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.term-progress-bar {
+    display: block;
+    height: 0.3rem;
+    overflow: hidden;
+    border-radius: 999px;
     background: var(--app-surface-muted);
-    color: var(--bs-body-color);
-    border: 1px solid var(--app-border);
+    box-shadow: inset 0 0 0 1px var(--app-border);
+}
+
+.term-progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--app-primary);
+}
+
+.term-progress.is-completed .term-progress-bar span {
+    background: var(--app-chart-3);
 }
 
 .row-actions {
@@ -167,7 +194,7 @@ th[aria-sort="descending"] .sort-btn::after {
     container: credits / inline-size;
 }
 
-@container credits (max-width: 54rem) {
+@container credits (max-width: 62.5rem) {
     .app-table thead {
         display: none;
     }
@@ -179,7 +206,7 @@ th[aria-sort="descending"] .sort-btn::after {
 
     .app-table tbody tr {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 0.75rem 1rem;
         padding: 1rem 1.5rem;
         border-bottom: 1px solid var(--app-border);
@@ -212,11 +239,11 @@ th[aria-sort="descending"] .sort-btn::after {
     }
 
     .app-table tbody td.cell-client {
-        grid-column: 1 / 4;
+        grid-column: 1 / 5;
     }
 
     .app-table tbody td.cell-actions {
-        grid-column: 4;
+        grid-column: 5;
         grid-row: 1;
         align-items: flex-end;
     }

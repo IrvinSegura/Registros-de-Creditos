@@ -17,9 +17,10 @@ Este proyecto es una aplicación web desarrollada en **Python (Flask) y SQLite**
 ## 🚀 Funcionalidades
 ✅ Registro de créditos con **simulación en vivo de la cuota mensual** (sistema de cuota fija).<br>
 ✅ **Tabla de amortización** de cada crédito: fecha, cuota, interés, capital y saldo.<br>
+✅ **Estado de cada crédito** (vigente o concluido), avance de cuotas, saldo pendiente y próximo vencimiento, según su calendario de pagos.<br>
 ✅ **Historial de cambios** de cada crédito: qué campo cambió, el valor anterior y el nuevo.<br>
 ✅ Listado con búsqueda, **orden por columna**, **filtros por fechas y montos**, paginación y **exportación a CSV**.<br>
-✅ Panel con **filtro de periodo**, indicadores de cartera, monto por mes, créditos por plazo y **clientes con mayor monto**.<br>
+✅ Panel con **filtro de periodo**, saldo pendiente de la cartera, **tasa ponderada por monto**, monto por mes, créditos por plazo, **clientes con mayor monto** y **próximos vencimientos** (30 días).<br>
 ✅ Validaciones en los formularios, alineadas con las de la API.<br>
 ✅ Menú lateral, tema claro y oscuro, y diseño adaptable a móvil.<br>
 ✅ **Inicio de sesión con roles** (Administrador, Analista y Consulta), bloqueo temporal tras intentos fallidos y protección CSRF.<br>
@@ -136,8 +137,8 @@ La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especif
 | `POST` | `/api/v1/credits` | Registra un crédito |
 | `GET` | `/api/v1/credits/export` | Descarga en CSV los créditos con los mismos filtros y orden |
 | `GET` | `/api/v1/credits/quote?amount=10000&interest_rate=12&term_months=12` | Simula la cuota mensual, los intereses y el total a pagar |
-| `GET` | `/api/v1/credits/summary` | Totales, promedios, monto por mes, créditos por plazo y clientes con mayor monto; acepta `issue_date_from` e `issue_date_to` |
-| `GET` | `/api/v1/credits/{id}` | Obtiene un crédito |
+| `GET` | `/api/v1/credits/summary` | Totales, saldo pendiente, tasa ponderada, monto por mes, créditos por plazo, clientes con mayor monto y próximos vencimientos; acepta `issue_date_from` e `issue_date_to` |
+| `GET` | `/api/v1/credits/{id}` | Obtiene un crédito, con su estado (`standing`): cuotas transcurridas, saldo pendiente y próximo vencimiento |
 | `PUT` | `/api/v1/credits/{id}` | Actualiza un crédito |
 | `DELETE` | `/api/v1/credits/{id}` | Elimina un crédito y su historial |
 | `GET` | `/api/v1/credits/{id}/amortization` | Tabla de amortización del crédito |
@@ -146,6 +147,8 @@ La documentación interactiva (Swagger UI) está en **`/api/docs`** y la especif
 Todas las rutas requieren una sesión iniciada (sin ella responden `401`). Las peticiones que modifican datos (`POST`, `PUT`, `DELETE`) deben enviar además la cabecera `X-CSRF-Token` con el token de la página, y el rol del usuario debe permitir la acción (si no, `403`).
 
 La tasa de interés es **anual** y se paga mensualmente. La cuota se calcula con el sistema de cuota fija (francés) y la última cuota absorbe el redondeo para que el saldo termine exactamente en cero.
+
+El estado de cada crédito se calcula a partir de su calendario, suponiendo que las cuotas vencidas se pagaron a tiempo (la aplicación todavía no registra pagos).
 
 Los montos y tasas se manejan como decimales exactos y se devuelven como texto (`"15000.50"`). Los errores siguen siempre el mismo formato:
 ```json

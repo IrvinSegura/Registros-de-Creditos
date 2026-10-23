@@ -67,6 +67,17 @@ def term_months_field(**kwargs) -> fields.Integer:
     )
 
 
+class StandingSchema(Schema):
+    status = fields.String(metadata={"description": "active while installments remain, completed after the last due date."})
+    installments_elapsed = fields.Integer(metadata={"description": "Installments whose due date has passed."})
+    outstanding_balance = fields.Decimal(
+        places=2, as_string=True, metadata={"description": "Balance left if every installment due so far was paid on time."}
+    )
+    next_due_date = fields.Date(allow_none=True)
+    next_payment = fields.Decimal(places=2, as_string=True, allow_none=True)
+    monthly_payment = fields.Decimal(places=2, as_string=True)
+
+
 class CreditSchema(Schema):
     id = fields.Integer(dump_only=True)
     client_name = fields.String(
@@ -93,6 +104,7 @@ class CreditSchema(Schema):
     )
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    standing = fields.Nested(StandingSchema, dump_only=True)
 
     @pre_load
     def normalize_client_name(self, data, **kwargs):
@@ -165,8 +177,23 @@ class TopClientSchema(Schema):
     total_amount = fields.Decimal(places=2, as_string=True)
 
 
+class UpcomingPaymentSchema(Schema):
+    credit_id = fields.Integer()
+    client_name = fields.String()
+    due_date = fields.Date()
+    amount = fields.Decimal(places=2, as_string=True)
+
+
 class CreditSummarySchema(Schema):
     total_credits = fields.Integer()
+    active_credits = fields.Integer()
+    completed_credits = fields.Integer()
+    outstanding_balance = fields.Decimal(
+        places=2, as_string=True, metadata={"description": "Sum of the outstanding balances, on schedule."}
+    )
+    weighted_interest_rate = fields.Decimal(
+        places=2, as_string=True, metadata={"description": "Average annual rate weighted by amount."}
+    )
     total_amount = fields.Decimal(places=2, as_string=True)
     average_amount = fields.Decimal(places=2, as_string=True)
     average_interest_rate = fields.Decimal(places=2, as_string=True)
@@ -174,6 +201,10 @@ class CreditSummarySchema(Schema):
     monthly = fields.List(fields.Nested(MonthlyTotalSchema))
     by_term = fields.List(fields.Nested(TermRangeSchema))
     top_clients = fields.List(fields.Nested(TopClientSchema))
+    upcoming_payments = fields.List(
+        fields.Nested(UpcomingPaymentSchema),
+        metadata={"description": "Installments due in the next 30 days, soonest first (at most 5)."},
+    )
 
 
 class QuoteQuerySchema(Schema):

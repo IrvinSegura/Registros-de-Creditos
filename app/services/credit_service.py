@@ -2,7 +2,7 @@
 
 import csv
 import io
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -20,14 +20,23 @@ TERM_RANGES = ("1-12", "13-24", "25-36", "37+")
 TOP_CLIENTS_LIMIT = 5
 TRACKED_FIELDS = ("client_name", "amount", "interest_rate", "term_months", "issue_date")
 
-# CSV headers are read by end users, so they stay in Spanish
+UPCOMING_WINDOW = timedelta(days=30)
+UPCOMING_LIMIT = 5
+
+# CSV headers and statuses are read by end users, so they stay in Spanish
+STATUS_LABELS = {amortization.ACTIVE: "Vigente", amortization.COMPLETED: "Concluido"}
 CSV_COLUMNS = (
-    ("id", "ID"),
-    ("client_name", "Cliente"),
-    ("amount", "Monto"),
-    ("interest_rate", "Tasa anual (%)"),
-    ("term_months", "Plazo (meses)"),
-    ("issue_date", "Fecha de otorgamiento"),
+    ("ID", lambda credit, standing: credit.id),
+    ("Cliente", lambda credit, standing: credit.client_name),
+    ("Monto", lambda credit, standing: credit.amount),
+    ("Tasa anual (%)", lambda credit, standing: credit.interest_rate),
+    ("Plazo (meses)", lambda credit, standing: credit.term_months),
+    ("Fecha de otorgamiento", lambda credit, standing: credit.issue_date),
+    ("Estado", lambda credit, standing: STATUS_LABELS[standing.status]),
+    ("Cuota mensual", lambda credit, standing: standing.monthly_payment),
+    ("Cuotas transcurridas", lambda credit, standing: standing.installments_elapsed),
+    ("Saldo pendiente", lambda credit, standing: standing.outstanding_balance),
+    ("Próximo vencimiento", lambda credit, standing: standing.next_due_date or ""),
 )
 
 
@@ -76,9 +85,10 @@ def list_credits(page: int, per_page: int, **filters: Any) -> Pagination:
 def export_csv(**filters: Any) -> str:
     buffer = io.StringIO()
     writer = csv.writer(buffer)
-    writer.writerow(header for _, header in CSV_COLUMNS)
+    writer.writerow(header for header, _ in CSV_COLUMNS)
     for credit in db.session.scalars(_filtered_query(**filters)):
-        writer.writerow(_serialize(getattr(credit, field)) for field, _ in CSV_COLUMNS)
+        standing = credit.standing
+        writer.writerow(_serialize(value(credit, standing)) for _, value in CSV_COLUMNS)
     # The BOM lets Excel detect UTF-8 so accented names display correctly
     return "﻿" + buffer.getvalue()
 
@@ -189,8 +199,11 @@ def get_summary(issue_date_from: date | None = None, issue_date_to: date | None 
         .limit(TOP_CLIENTS_LIMIT)
     ).all()
 
+    portfolio = _portfolio_standing(db.session.scalars(in_period(db.select(Credit))), date.today())
+
     return {
         "total_credits": count,
+        **portfolio,
         "total_amount": total_amount,
         "average_amount": total_amount / count if count else Decimal(0),
         "average_interest_rate": rate_sum / count if count else Decimal(0),
@@ -204,6 +217,40 @@ def get_summary(issue_date_from: date | None = None, issue_date_to: date | None 
             {"client_name": name, "credits": credits, "total_amount": _to_decimal(amount)}
             for name, credits, amount in top_clients
         ],
+    }
+
+
+def _portfolio_standing(credits, today: date) -> dict[str, Any]:
+    """Totals that depend on each credit's payment schedule, so they are computed here rather than in SQL."""
+    active = completed = 0
+    outstanding = weighted_rate = amount_sum = Decimal(0)
+    upcoming = []
+    for credit in credits:
+        standing = credit.standing
+        outstanding += standing.outstanding_balance
+        weighted_rate += credit.amount * credit.interest_rate
+        amount_sum += credit.amount
+        if standing.status == amortization.COMPLETED:
+            completed += 1
+            continue
+        active += 1
+        if standing.next_due_date <= today + UPCOMING_WINDOW:
+            upcoming.append(
+                {
+                    "credit_id": credit.id,
+                    "client_name": credit.client_name,
+                    "due_date": standing.next_due_date,
+                    "amount": standing.next_payment,
+                }
+            )
+
+    upcoming.sort(key=lambda payment: (payment["due_date"], payment["client_name"]))
+    return {
+        "active_credits": active,
+        "completed_credits": completed,
+        "outstanding_balance": outstanding,
+        "weighted_interest_rate": weighted_rate / amount_sum if amount_sum else Decimal(0),
+        "upcoming_payments": upcoming[:UPCOMING_LIMIT],
     }
 
 

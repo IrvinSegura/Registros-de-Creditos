@@ -3,7 +3,10 @@
         <div class="d-flex align-items-center gap-3">
             <span class="avatar avatar-lg" id="detail-avatar" aria-hidden="true"></span>
             <div>
-                <h2 class="offcanvas-title h5 mb-0" id="credit-detail-title">Crédito</h2>
+                <div class="d-flex align-items-center gap-2">
+                    <h2 class="offcanvas-title h5 mb-0" id="credit-detail-title">Crédito</h2>
+                    <span class="badge rounded-pill status-badge" id="detail-status"></span>
+                </div>
                 <p class="small text-body-secondary mb-0" id="detail-subtitle"></p>
             </div>
         </div>
@@ -19,6 +22,22 @@
             <div><span>Intereses totales</span><strong id="detail-interest">—</strong></div>
             <div><span>Total a pagar</span><strong id="detail-total">—</strong></div>
         </div>
+
+        <section class="detail-progress" aria-labelledby="detail-progress-title">
+            <div class="detail-progress-header">
+                <h3 class="detail-progress-title" id="detail-progress-title">Avance del crédito</h3>
+                <span id="detail-progress-label"></span>
+            </div>
+            <div class="detail-progress-bar" role="progressbar" id="detail-progress-bar" aria-valuemin="0"
+                 aria-labelledby="detail-progress-title">
+                <span id="detail-progress-fill"></span>
+            </div>
+            <dl class="detail-progress-facts">
+                <div><dt>Saldo pendiente</dt><dd id="detail-outstanding">—</dd></div>
+                <div><dt>Próximo vencimiento</dt><dd id="detail-next">—</dd></div>
+            </dl>
+            <p class="detail-progress-note">Calculado según el calendario de pagos, suponiendo cuotas pagadas a tiempo.</p>
+        </section>
 
         <ul class="nav nav-underline detail-tabs" role="tablist">
             <li class="nav-item" role="presentation">

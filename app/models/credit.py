@@ -6,6 +6,7 @@ from sqlalchemy import Date, DateTime, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.services import amortization
 
 if TYPE_CHECKING:
     from app.models.credit_change import CreditChange
@@ -28,6 +29,11 @@ class Credit(db.Model):
 
     # The ORM deletes the history itself: SQLite ignores ON DELETE CASCADE unless foreign keys are enabled
     changes: Mapped[list["CreditChange"]] = relationship(back_populates="credit", cascade="all, delete-orphan")
+
+    @property
+    def standing(self) -> amortization.Standing:
+        # Derived from the payment schedule, so it is never stored and never goes stale
+        return amortization.standing(self.amount, self.interest_rate, self.term_months, self.issue_date, date.today())
 
     def __repr__(self) -> str:
         return f"<Credit id={self.id} client_name={self.client_name!r} amount={self.amount}>"

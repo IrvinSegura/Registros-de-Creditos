@@ -520,6 +520,27 @@ body {
     box-shadow: var(--app-shadow);
 }
 
+/* Credit status: active or completed */
+.status-badge {
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+}
+
+.status-active {
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+}
+
+.status-completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #047857;
+}
+
+[data-bs-theme="dark"] .status-completed {
+    color: #6ee7b7;
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 991.98px) {
     .app-topbar {
