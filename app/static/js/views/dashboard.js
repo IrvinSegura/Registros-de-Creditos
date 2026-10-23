@@ -1,3 +1,4 @@
+import { createPeriodPicker } from "../components/period-picker.js";
 import { renderPortfolioCharts, resizePortfolioCharts } from "../components/portfolio-charts.js";
 import { creditsApi } from "../lib/api.js";
 import { onCreditsChanged } from "../lib/events.js";
@@ -10,51 +11,9 @@ let summary = null;
 let period = {};
 let openCredit = () => {};
 
-// Each preset returns the issue-date range sent to the API
-const PRESETS = {
-    all: () => ({}),
-    year: () => {
-        const year = todayIso().slice(0, 4);
-        return { issue_date_from: `${year}-01-01`, issue_date_to: `${year}-12-31` };
-    },
-    last12: () => {
-        const today = todayIso();
-        const [year, month] = today.split("-").map(Number);
-        // From the first day of the month 11 months ago, so 12 calendar months are covered
-        const start = new Date(Date.UTC(year, month - 12, 1)).toISOString().slice(0, 10);
-        return { issue_date_from: start, issue_date_to: today };
-    },
-};
-
 export function initDashboard({ onView } = {}) {
     if (onView) openCredit = onView;
-    const presetButtons = document.querySelectorAll("[data-period]");
-    const customForm = document.getElementById("period-form");
-
-    presetButtons.forEach(button => button.addEventListener("click", () => {
-        presetButtons.forEach(other => {
-            other.classList.toggle("active", other === button);
-            other.setAttribute("aria-pressed", String(other === button));
-        });
-        const preset = button.dataset.period;
-        customForm.hidden = preset !== "custom";
-        if (preset === "custom") {
-            document.getElementById("period-from").focus();
-            return;
-        }
-        setPeriod(PRESETS[preset]());
-    }));
-
-    customForm.addEventListener("submit", event => {
-        event.preventDefault();
-        const from = document.getElementById("period-from").value;
-        const to = document.getElementById("period-to").value;
-        if (!from || !to || from > to) {
-            document.getElementById("period-label").textContent = "Elige una fecha inicial anterior o igual a la final.";
-            return;
-        }
-        setPeriod({ issue_date_from: from, issue_date_to: to });
-    });
+    createPeriodPicker({ onChange: setPeriod });
 
     document.getElementById("upcoming-payments").addEventListener("click", event => {
         const button = event.target.closest("button[data-id]");
@@ -77,11 +36,6 @@ function setPeriod(range) {
     loadSummary();
 }
 
-function periodLabel() {
-    if (!period.issue_date_from) return "Todo el historial";
-    return `${formatDate(period.issue_date_from)} – ${formatDate(period.issue_date_to)}`;
-}
-
 async function loadSummary() {
     try {
         summary = await creditsApi.summary(period);
@@ -93,7 +47,6 @@ async function loadSummary() {
 }
 
 function render(data) {
-    document.getElementById("period-label").textContent = periodLabel();
     const hasCredits = data.total_credits > 0;
     const total = Number(data.total_amount);
     const outstandingShare = total > 0 ? (Number(data.outstanding_balance) / total) * 100 : 0;

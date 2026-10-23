@@ -1,19 +1,46 @@
 <div class="period-bar mb-4">
-    <div class="btn-group period-presets" role="group" aria-label="Periodo">
-        <button type="button" class="btn btn-outline-secondary active" data-period="all" aria-pressed="true">Todo</button>
-        <button type="button" class="btn btn-outline-secondary" data-period="year" aria-pressed="false">Este año</button>
-        <button type="button" class="btn btn-outline-secondary" data-period="last12" aria-pressed="false">Últimos 12 meses</button>
-        <button type="button" class="btn btn-outline-secondary" data-period="custom" aria-pressed="false">Personalizado</button>
+    <div class="segmented period-presets" role="group" aria-label="Periodo de otorgamiento">
+        <button type="button" class="segmented-option is-active" data-period="all" aria-pressed="true">Todo</button>
+        <button type="button" class="segmented-option" data-period="month" aria-pressed="false">Este mes</button>
+        <button type="button" class="segmented-option" data-period="year" aria-pressed="false">Este año</button>
+        <button type="button" class="segmented-option" data-period="last12" aria-pressed="false">Últimos 12 meses</button>
+        <div class="dropdown period-custom">
+            <button type="button" class="segmented-option" id="period-custom-toggle" data-period="custom" aria-pressed="false"
+                    data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-controls="period-form">
+                <i class="bi bi-calendar-range" aria-hidden="true"></i> Personalizado
+                <i class="bi bi-chevron-down period-caret" aria-hidden="true"></i>
+            </button>
+            <form class="dropdown-menu period-menu" id="period-form" novalidate aria-labelledby="period-menu-title">
+                <p class="period-menu-title" id="period-menu-title">Rango personalizado</p>
+                <p class="period-menu-hint">Muestra los créditos otorgados entre estas fechas.</p>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label for="period-from" class="form-label">Desde</label>
+                        <input type="date" class="form-control" id="period-from" min="2000-01-01" required
+                               aria-describedby="period-error">
+                    </div>
+                    <div class="col-6">
+                        <label for="period-to" class="form-label">Hasta</label>
+                        <input type="date" class="form-control" id="period-to" min="2000-01-01" required
+                               aria-describedby="period-error">
+                    </div>
+                </div>
+                <p class="period-menu-error" id="period-error" role="alert"></p>
+                <div class="period-menu-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="period-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <form class="period-custom" id="period-form" hidden novalidate>
-        <label for="period-from" class="visually-hidden">Desde</label>
-        <input type="date" class="form-control form-control-sm" id="period-from" required>
-        <span class="text-body-secondary small">a</span>
-        <label for="period-to" class="visually-hidden">Hasta</label>
-        <input type="date" class="form-control form-control-sm" id="period-to" required>
-        <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
-    </form>
-    <span class="period-label ms-lg-auto" id="period-label"></span>
+    <div class="period-summary">
+        <i class="bi bi-calendar3" aria-hidden="true"></i>
+        <span id="period-label" aria-live="polite"></span>
+        <button type="button" class="period-clear" id="period-clear" title="Ver todo el historial"
+                aria-label="Quitar el filtro de periodo" hidden>
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+    </div>
 </div>
 
 <div class="row g-3 mb-3">
