@@ -27,7 +27,7 @@ class Credit(db.Model):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    # The ORM deletes the history itself: SQLite ignores ON DELETE CASCADE unless foreign keys are enabled
+    # The ORM deletes the history too, so deleting works the same with or without database-level cascades
     changes: Mapped[list["CreditChange"]] = relationship(back_populates="credit", cascade="all, delete-orphan")
 
     @property
