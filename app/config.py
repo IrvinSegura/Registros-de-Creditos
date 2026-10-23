@@ -6,10 +6,6 @@ from datetime import timedelta
 DEFAULT_SECRET_KEY = "dev-only-change-me"
 
 
-def _split_csv(value: str) -> list[str]:
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
 class BaseConfig:
     ENV_NAME = "base"
     SECRET_KEY = os.getenv("SECRET_KEY", DEFAULT_SECRET_KEY)
@@ -25,8 +21,19 @@ class BaseConfig:
     SESSION_COOKIE_SECURE = False
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
 
-    # Cross-origin access is disabled unless origins are listed explicitly
-    CORS_ORIGINS = _split_csv(os.getenv("CORS_ORIGINS", ""))
+    # Business time zone: decides what "today" is for dates, standings and due dates (see app/clock.py)
+    TIMEZONE = os.getenv("APP_TIMEZONE", "America/Mexico_City")
+
+    # Logs go to the console unless LOG_FILE names a file (relative paths land in instance/), see app/logs.py
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    LOG_FILE = os.getenv("LOG_FILE", "")
+    # One line per request; the development server already prints its own
+    LOG_REQUESTS = True
+
+    # Database copies made by `flask backup create` and by serve.py (see app/services/backup_service.py)
+    BACKUP_DIR = os.getenv("BACKUP_DIR", "backups")
+    BACKUP_KEEP = int(os.getenv("BACKUP_KEEP", "30"))
+    BACKUP_INTERVAL_HOURS = float(os.getenv("BACKUP_INTERVAL_HOURS", "24"))
 
     # OpenAPI documentation served at /api/docs
     API_TITLE = "Credit Registry API"
@@ -43,6 +50,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     # `flask run` without --debug switches debug off, which would also keep edited templates cached
     TEMPLATES_AUTO_RELOAD = True
+    LOG_REQUESTS = False
 
 
 class TestingConfig(BaseConfig):
