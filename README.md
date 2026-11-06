@@ -243,7 +243,7 @@ python -m playwright install chromium
 pytest -m e2e
 ```
 
-La integración continua (GitHub Actions) corre flake8, las pruebas con cobertura, `pip-audit` y las pruebas en el navegador en cada push y pull request, en cualquier rama. Además, **Dependabot** abre cada semana un pull request para actualizar las dependencias de Python y de GitHub Actions.
+La integración continua (GitHub Actions) corre flake8, las pruebas con cobertura, `pip-audit` y las pruebas en el navegador en cada push y pull request, en cualquier rama. Las alertas de Dependabot de GitHub avisan si alguna dependencia tiene una vulnerabilidad conocida; las actualizaciones se aplican a mano (`pip list --outdated` muestra qué hay nuevo).
 
 ## 🗃 Migraciones
 ```sh
