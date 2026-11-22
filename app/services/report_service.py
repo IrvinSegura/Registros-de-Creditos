@@ -375,9 +375,13 @@ def _pdf_pairs(pdf: FPDF, pairs: list[tuple[str, str]], columns: int) -> None:
         pdf.ln(5)
         pdf.set_font("Helvetica", "B", 10)
         pdf.set_text_color(0, 0, 0)
-        for _, value in chunk:
-            pdf.cell(width, 6, _latin1(value))
-        pdf.ln(8)
+        # A long value wraps inside its own column instead of running into the next one
+        top, bottom = pdf.get_y(), pdf.get_y()
+        for index, (_, value) in enumerate(chunk):
+            pdf.set_xy(pdf.l_margin + index * width, top)
+            pdf.multi_cell(width - 3, 6, _latin1(value), align="L", new_x="LMARGIN", new_y="NEXT")
+            bottom = max(bottom, pdf.get_y())
+        pdf.set_y(bottom + 2)
 
 
 def _pdf_table(pdf: FPDF, headers, widths, aligns, rows: list[list[str]]) -> None:
