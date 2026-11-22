@@ -262,3 +262,18 @@ La aplicación activa las llaves foráneas de SQLite en cada conexión, así que
 | Usuarios | Móvil (tema oscuro) |
 |---|---|
 | ![Administración de usuarios](docs/screenshots/users.png) | ![Listado en el teléfono](docs/screenshots/mobile.png) |
+
+### Reportes
+El estado de cuenta de cada crédito y la cartera filtrada se descargan en PDF y en Excel.
+
+| Estado de cuenta (PDF) | Tabla de amortización (Excel) |
+|---|---|
+| ![Estado de cuenta en PDF: datos del crédito, situación al día, tabla de amortización y pagos registrados](docs/screenshots/report-statement-pdf.png) | ![Hoja de amortización del estado de cuenta en Excel, con el estado de cada cuota](docs/screenshots/report-statement-xlsx.png) |
+
+**Cartera en PDF**: totales por estado, monto otorgado, pagado, saldo y monto vencido.
+
+![Cartera de créditos en PDF](docs/screenshots/report-portfolio-pdf.png)
+
+**Cartera en Excel**: con filtros en el encabezado, totales con fórmulas y una hoja de resumen.
+
+![Cartera de créditos en Excel](docs/screenshots/report-portfolio-xlsx.png)

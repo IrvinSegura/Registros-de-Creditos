@@ -3,6 +3,8 @@
 {% block head %}
     {# Read by static/js/lib/api.js and sent back in the X-CSRF-Token header #}
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    {# Read by static/js/lib/format.js so "today" matches the server's APP_TIMEZONE, not the browser's #}
+    <meta name="time-zone" content="{{ config.TIMEZONE }}">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet"
           integrity="sha384-9zhnRArCpusIVIudEVdI3QmXKH9nCjEGc2rNvdcQ1utx3a3zbLtW3rBOeJ2PvupL" crossorigin="anonymous">
     {# One stylesheet per view and component (same layout as templates/ and js/) #}

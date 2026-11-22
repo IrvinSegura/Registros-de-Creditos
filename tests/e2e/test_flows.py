@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from playwright.sync_api import expect
 
+from app import clock
 from app.extensions import db
 from app.models import Credit
 from app.services import user_service
@@ -43,6 +44,26 @@ def test_admin_registers_a_credit_and_records_a_payment(page):
     expect(page.locator("#detail-payments-count")).to_have_text("1")
     expect(page.locator("#detail-payments-list")).to_contain_text("Recibo 1")
     expect(page.locator("#detail-progress-label")).to_have_text("1 de 12 cuotas pagadas")
+
+
+def test_today_follows_the_business_time_zone_not_the_browser(browser, base_url, live_app):
+    # UTC+14 is a calendar day ahead of Mexico City for most of the day; "today" must still be the server's
+    context = browser.new_context(base_url=base_url, timezone_id="Pacific/Kiritimati")
+    page = context.new_page()
+    try:
+        sign_in(page, "admin")
+        page.get_by_role("link", name="Nuevo crédito", exact=True).first.click()
+        with live_app.app_context():
+            expect(page.locator("#issue_date")).to_have_value(clock.today().isoformat())
+
+        page.locator("#client_name").fill("Zona Horaria")
+        page.locator("#amount").fill("5000")
+        page.locator("#interest_rate").fill("10")
+        page.locator("#term_months").fill("6")
+        page.locator("#credit-form button[type='submit']").click()
+        expect(toast(page)).to_have_text("Crédito registrado")
+    finally:
+        context.close()
 
 
 def test_overdue_credits_show_on_the_dashboard_and_in_the_filter(page, seed_credit):

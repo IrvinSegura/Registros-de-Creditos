@@ -39,8 +39,12 @@ export function initials(name) {
     return name.split(" ").filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase();
 }
 
-// Local calendar date as YYYY-MM-DD, for date inputs
+// The business time zone decides what "today" is, like the API does; the browser's own zone is only a fallback
+const TIME_ZONE = document.querySelector('meta[name="time-zone"]')?.content || undefined;
+// en-CA formats dates as YYYY-MM-DD
+const isoDay = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: TIME_ZONE });
+
+// Today's date in the business time zone as YYYY-MM-DD, for date inputs and date checks
 export function todayIso() {
-    const now = new Date();
-    return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    return isoDay.format(new Date());
 }
